@@ -1,0 +1,57 @@
+{
+  "common": {
+    "cancel": "Annuler",
+    "confirm": "Confirmer"
+  },
+  "card": {
+    "default_popup_title": "Allumer {action} pendant…",
+    "default_button_format": "{minutes} min",
+    "timer_started": "Minuterie démarrée : {duration} min",
+    "timer_cancelled": "Minuterie annulée",
+    "timer_finished": "Minuterie terminée",
+    "all_slots_in_use": "Tous les emplacements de minuterie sont utilisés",
+    "custom_duration": "Durée personnalisée",
+    "enter_minutes": "Entrez les minutes (1-1440)",
+    "remaining": "Restant"
+  },
+  "editor": {
+    "entity": "Entité",
+    "entity_required": "L'entité est requise",
+    "entity_invalid_domain": "L'entité doit être un switch, light, input_boolean, fan, siren, humidifier ou media_player",
+    "action": "Action",
+    "action_on": "Allumer",
+    "action_off": "Éteindre",
+    "action_toggle": "Basculer",
+    "revert_to": "Revenir à",
+    "revert_previous": "État précédent",
+    "revert_on": "Allumé",
+    "revert_off": "Éteint",
+    "revert_none": "Aucun (laisser tel quel)",
+    "durations": "Durées (minutes)",
+    "durations_required": "Au moins une durée est requise",
+    "durations_max": "Maximum 8 durées autorisées",
+    "durations_positive": "Les durées doivent être des nombres positifs",
+    "name": "Nom (optionnel)",
+    "icon": "Icône (optionnel)",
+    "show_remaining": "Afficher le temps restant",
+    "allow_custom_duration": "Autoriser une durée personnalisée",
+    "confirm_cancel": "Confirmer avant d'annuler",
+    "tap_behavior": "Comportement au toucher",
+    "tap_popup": "Afficher la popup",
+    "tap_immediate": "Immédiat (utiliser la première durée)",
+    "long_press_action": "Action de pression longue",
+    "long_press_none": "Aucune",
+    "long_press_cancel": "Annuler la minuterie",
+    "theme_popup_title": "Modèle de titre de popup",
+    "theme_button_format": "Modèle de format de bouton",
+    "durations_unique": "Les durées doivent être des entiers uniques",
+    "action_invalid_media_player": "Media player prend uniquement les actions allumer/éteindre"
+  },
+  "popup": {
+    "cancel_timer": "Annuler la minuterie",
+    "replace_timer": "Remplacer la minuterie",
+    "extend_timer": "Prolonger la minuterie",
+    "confirm_cancel_title": "Annuler la minuterie ?",
+    "confirm_cancel_message": "Êtes-vous sûr de vouloir annuler cette minuterie ?"
+  }
+}

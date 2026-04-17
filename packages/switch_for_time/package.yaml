@@ -1,0 +1,476 @@
+# Switch For Time - Home Assistant Package
+# This package provides the backend scripts and automations for the Switch For Time custom card
+
+# ========================================
+# Input Helpers
+# ========================================
+input_text:
+  switch_for_time_state:
+    name: Switch For Time State
+    max: 255
+    initial: '{}'
+
+# ========================================
+# Timer Helpers (8 slots by default)
+# ========================================
+timer:
+  switch_for_time_slot_1:
+    name: Switch For Time Slot 1
+    restore: true
+
+  switch_for_time_slot_2:
+    name: Switch For Time Slot 2
+    restore: true
+
+  switch_for_time_slot_3:
+    name: Switch For Time Slot 3
+    restore: true
+
+  switch_for_time_slot_4:
+    name: Switch For Time Slot 4
+    restore: true
+
+  switch_for_time_slot_5:
+    name: Switch For Time Slot 5
+    restore: true
+
+  switch_for_time_slot_6:
+    name: Switch For Time Slot 6
+    restore: true
+
+  switch_for_time_slot_7:
+    name: Switch For Time Slot 7
+    restore: true
+
+  switch_for_time_slot_8:
+    name: Switch For Time Slot 8
+    restore: true
+
+# ========================================
+# Scripts
+# ========================================
+script:
+  # Main script: Start a timed switch operation
+  switch_for_time:
+    alias: Switch For Time
+    mode: queued
+    max: 10
+    fields:
+      entity_id:
+        description: Target entity to control
+        required: true
+        selector:
+          entity:
+            domain:
+              - switch
+              - light
+              - input_boolean
+              - fan
+              - siren
+              - humidifier
+              - media_player
+      action:
+        description: Action to perform
+        required: true
+        selector:
+          select:
+            options:
+              - 'on'
+              - 'off'
+              - 'toggle'
+      duration_minutes:
+        description: Duration in minutes before reverting
+        required: true
+        selector:
+          number:
+            min: 1
+            max: 1440
+            mode: box
+      revert_to:
+        description: State to revert to
+        required: false
+        default: 'previous'
+        selector:
+          select:
+            options:
+              - 'previous'
+              - 'on'
+              - 'off'
+              - 'none'
+      cancel_existing:
+        description: Cancel existing timer for this entity
+        required: false
+        default: true
+        selector:
+          boolean:
+    sequence:
+      # Cancel existing timer if requested
+      - if:
+          - condition: template
+            value_template: '{{ cancel_existing }}'
+        then:
+          - service: script.switch_for_time_cancel
+            data:
+              entity_id: '{{ entity_id }}'
+
+      # Capture current state
+      - variables:
+          previous_state: '{{ states(entity_id) }}'
+          ends_at: '{{ (now() + timedelta(minutes=duration_minutes)).isoformat() }}'
+
+      # Find available slot
+      - variables:
+          available_slot: >
+            {% set ns = namespace(slot=0) %}
+            {% for i in range(1, 9) %}
+              {% if ns.slot == 0 and is_state('timer.switch_for_time_slot_' ~ i, 'idle') %}
+                {% set ns.slot = i %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.slot }}
+
+      # Check if slot available
+      - if:
+          - condition: template
+            value_template: '{{ available_slot|int == 0 }}'
+        then:
+          - service: persistent_notification.create
+            data:
+              title: Switch For Time
+              message: 'All timer slots are in use. Please wait for a timer to finish.'
+          - stop: 'No available timer slots'
+
+      # Persist state
+      - service: script.switch_for_time_persist
+        data:
+          entity_id: '{{ entity_id }}'
+          slot: '{{ available_slot }}'
+          previous_state: '{{ previous_state }}'
+          revert_to: '{{ revert_to }}'
+          action: '{{ action }}'
+          duration_minutes: '{{ duration_minutes }}'
+          ends_at: '{{ ends_at }}'
+
+      # Apply the action
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: '{{ action == "on" }}'
+            sequence:
+              - service: homeassistant.turn_on
+                target:
+                  entity_id: '{{ entity_id }}'
+          - conditions:
+              - condition: template
+                value_template: '{{ action == "off" }}'
+            sequence:
+              - service: homeassistant.turn_off
+                target:
+                  entity_id: '{{ entity_id }}'
+          - conditions:
+              - condition: template
+                value_template: '{{ action == "toggle" }}'
+            sequence:
+              - service: homeassistant.toggle
+                target:
+                  entity_id: '{{ entity_id }}'
+
+      # Start the timer
+      - service: timer.start
+        target:
+          entity_id: 'timer.switch_for_time_slot_{{ available_slot }}'
+        data:
+          duration: '{{ "%02d:%02d:00" | format(duration_minutes // 60, duration_minutes % 60) }}'
+
+      # Fire event
+      - event: switch_for_time_started
+        event_data:
+          entity_id: '{{ entity_id }}'
+          ends_at: '{{ ends_at }}'
+          duration_minutes: '{{ duration_minutes }}'
+          slot: '{{ available_slot }}'
+
+  # Cancel a timer for a specific entity
+  switch_for_time_cancel:
+    alias: Switch For Time Cancel
+    mode: parallel
+    max: 10
+    fields:
+      entity_id:
+        description: Entity to cancel timer for
+        required: true
+    sequence:
+      # Get current state
+      - variables:
+          state_json: '{{ states("input_text.switch_for_time_state") }}'
+          state_data: '{{ state_json | from_json }}'
+          timer_info: '{{ state_data.get(entity_id, {}) }}'
+          slot: '{{ timer_info.get("slot", 0) }}'
+
+      # Cancel timer if found
+      - if:
+          - condition: template
+            value_template: '{{ slot|int > 0 }}'
+        then:
+          - service: timer.cancel
+            target:
+              entity_id: 'timer.switch_for_time_slot_{{ slot }}'
+
+          # Revert immediately on cancel
+          - service: script.switch_for_time_revert
+            data:
+              entity_id: '{{ entity_id }}'
+              slot: '{{ slot }}'
+              fire_event: false
+
+          # Fire event
+          - event: switch_for_time_cancelled
+            event_data:
+              entity_id: '{{ entity_id }}'
+
+  # Persist timer state
+  switch_for_time_persist:
+    alias: Switch For Time Persist
+    mode: parallel
+    max: 10
+    fields:
+      entity_id:
+        required: true
+      slot:
+        required: true
+      previous_state:
+        required: true
+      revert_to:
+        required: true
+      action:
+        required: true
+      duration_minutes:
+        required: true
+      ends_at:
+        required: true
+    sequence:
+      - variables:
+          current_state: '{{ states("input_text.switch_for_time_state") }}'
+          state_data: '{{ current_state | from_json if current_state != "" else {} }}'
+          new_entry:
+            slot: '{{ slot }}'
+            previous_state: '{{ previous_state }}'
+            revert_to: '{{ revert_to }}'
+            started_at: '{{ now().isoformat() }}'
+            ends_at: '{{ ends_at }}'
+            action: '{{ action }}'
+            duration_minutes: '{{ duration_minutes }}'
+
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.switch_for_time_state
+        data:
+          value: >
+            {% set new_state = dict(state_data, **{entity_id: new_entry}) %}
+            {{ new_state | to_json }}
+
+  # Remove entity from state
+  switch_for_time_remove_state:
+    alias: Switch For Time Remove State
+    mode: parallel
+    max: 10
+    fields:
+      entity_id:
+        required: true
+    sequence:
+      - variables:
+          current_state: '{{ states("input_text.switch_for_time_state") }}'
+          state_data: '{{ current_state | from_json if current_state != "" else {} }}'
+
+      - service: input_text.set_value
+        target:
+          entity_id: input_text.switch_for_time_state
+        data:
+          value: >
+            {% set ns = namespace(result={}) %}
+            {% for key, value in state_data.items() %}
+              {% if key != entity_id %}
+                {% set ns.result = dict(ns.result, **{key: value}) %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.result | to_json }}
+
+  # Revert an entity to its target state
+  switch_for_time_revert:
+    alias: Switch For Time Revert
+    mode: parallel
+    max: 10
+    fields:
+      entity_id:
+        required: true
+      slot:
+        required: true
+      fire_event:
+        required: false
+        default: true
+    sequence:
+      # Get timer info
+      - variables:
+          state_json: '{{ states("input_text.switch_for_time_state") }}'
+          state_data: '{{ state_json | from_json }}'
+          timer_info: '{{ state_data.get(entity_id, {}) }}'
+          revert_to: '{{ timer_info.get("revert_to", "previous") }}'
+          previous_state: '{{ timer_info.get("previous_state", "off") }}'
+
+      # Apply revert action
+      - choose:
+          - conditions:
+              - condition: template
+                value_template: '{{ revert_to == "previous" }}'
+            sequence:
+              - if:
+                  - condition: template
+                    value_template: '{{ previous_state == "on" }}'
+                then:
+                  - service: homeassistant.turn_on
+                    target:
+                      entity_id: '{{ entity_id }}'
+                else:
+                  - service: homeassistant.turn_off
+                    target:
+                      entity_id: '{{ entity_id }}'
+          - conditions:
+              - condition: template
+                value_template: '{{ revert_to == "on" }}'
+            sequence:
+              - service: homeassistant.turn_on
+                target:
+                  entity_id: '{{ entity_id }}'
+          - conditions:
+              - condition: template
+                value_template: '{{ revert_to == "off" }}'
+            sequence:
+              - service: homeassistant.turn_off
+                target:
+                  entity_id: '{{ entity_id }}'
+
+      # Remove from state
+      - service: script.switch_for_time_remove_state
+        data:
+          entity_id: '{{ entity_id }}'
+
+      # Fire event
+      - if:
+          - condition: template
+            value_template: '{{ fire_event }}'
+        then:
+          - event: switch_for_time_finished
+            event_data:
+              entity_id: '{{ entity_id }}'
+
+# ========================================
+# Automations
+# ========================================
+automation:
+  # Handle timer finished events
+  - id: switch_for_time_on_timer_finished
+    alias: Switch For Time - On Timer Finished
+    mode: parallel
+    max: 10
+    trigger:
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.switch_for_time_slot_1
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.switch_for_time_slot_2
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.switch_for_time_slot_3
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.switch_for_time_slot_4
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.switch_for_time_slot_5
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.switch_for_time_slot_6
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.switch_for_time_slot_7
+      - platform: event
+        event_type: timer.finished
+        event_data:
+          entity_id: timer.switch_for_time_slot_8
+    action:
+      # Find which entity is using this slot
+      - variables:
+          slot_number: >
+            {{ trigger.event.data.entity_id.split('_')[-1] }}
+          state_json: '{{ states("input_text.switch_for_time_state") }}'
+          state_data: '{{ state_json | from_json }}'
+          matching_entity: >
+            {% set ns = namespace(entity='') %}
+            {% for entity_id, timer_info in state_data.items() %}
+              {% if timer_info.slot|string == slot_number|string %}
+                {% set ns.entity = entity_id %}
+              {% endif %}
+            {% endfor %}
+            {{ ns.entity }}
+
+      # Revert if entity found
+      - if:
+          - condition: template
+            value_template: '{{ matching_entity != "" }}'
+        then:
+          - service: script.switch_for_time_revert
+            data:
+              entity_id: '{{ matching_entity }}'
+              slot: '{{ slot_number }}'
+
+  # Resume timers on Home Assistant restart
+  - id: switch_for_time_resume_on_restart
+    alias: Switch For Time - Resume On Restart
+    trigger:
+      - platform: homeassistant
+        event: start
+    action:
+      - delay: '00:00:05'  # Wait for entities to be available
+
+      - variables:
+          state_json: '{{ states("input_text.switch_for_time_state") }}'
+          state_data: '{{ state_json | from_json if state_json != "" else {} }}'
+
+      # Process each timer
+      - repeat:
+          for_each: '{{ state_data.items() | list }}'
+          sequence:
+            - variables:
+                entity_id: '{{ repeat.item[0] }}'
+                timer_info: '{{ repeat.item[1] }}'
+                ends_at: '{{ timer_info.ends_at }}'
+                slot: '{{ timer_info.slot }}'
+                ends_at_dt: '{{ strptime(ends_at, "%Y-%m-%dT%H:%M:%S.%f%z") if "." in ends_at else strptime(ends_at, "%Y-%m-%dT%H:%M:%S%z") }}'
+                now_dt: '{{ now() }}'
+                remaining_seconds: '{{ (ends_at_dt - now_dt).total_seconds() }}'
+                remaining_seconds_int: '{{ remaining_seconds | int }}'
+
+            # If timer expired, revert immediately
+            - if:
+                - condition: template
+                  value_template: '{{ remaining_seconds <= 0 }}'
+              then:
+                - service: script.switch_for_time_revert
+                  data:
+                    entity_id: '{{ entity_id }}'
+                    slot: '{{ slot }}'
+              else:
+                # Restart timer with remaining time
+                - service: timer.start
+                  target:
+                    entity_id: 'timer.switch_for_time_slot_{{ slot }}'
+                  data:
+                    duration: '{{ "%d:%02d:%02d" | format(remaining_seconds_int // 3600, (remaining_seconds_int % 3600) // 60, remaining_seconds_int % 60) }}'
