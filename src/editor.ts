@@ -11,6 +11,21 @@ export class SwitchForTimeCardEditor extends LitElement implements LovelaceCardE
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: SwitchForTimeCardConfig;
   @state() private _durationsError?: string;
+  private readonly _allowedConfigKeys = new Set([
+    'entity',
+    'action',
+    'revert_to',
+    'durations',
+    'name',
+    'icon',
+    'show_remaining',
+    'allow_custom_duration',
+    'confirm_cancel',
+    'tap_behavior',
+    'long_press_action',
+    'theme.popup_title',
+    'theme.button_format',
+  ]);
 
   public setConfig(config: SwitchForTimeCardConfig): void {
     this._config = config;
@@ -33,10 +48,6 @@ export class SwitchForTimeCardEditor extends LitElement implements LovelaceCardE
     const durations: number[] = [];
     const seen = new Set<number>();
     for (const part of parts) {
-      if (!/^\d+$/.test(part)) {
-        return { error: 'Each duration must be a positive integer.' };
-      }
-
       const parsed = Number(part);
       if (!Number.isInteger(parsed) || parsed <= 0) {
         return { error: 'Each duration must be a positive integer.' };
@@ -54,6 +65,10 @@ export class SwitchForTimeCardEditor extends LitElement implements LovelaceCardE
   }
 
   private _setConfigValue(configValue: string, value: any): void {
+    if (!this._allowedConfigKeys.has(configValue)) {
+      return;
+    }
+
     const newConfig = { ...this._config };
 
     if (configValue === 'durations') {

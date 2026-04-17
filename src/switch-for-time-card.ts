@@ -94,10 +94,6 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
       ...config,
     };
 
-    if (this.isConnected) {
-      this._subscribeToEvents();
-      this._updateTimerState();
-    }
   }
 
   public getCardSize(): number {
@@ -121,6 +117,10 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
   protected updated(changedProps: PropertyValues): void {
     super.updated(changedProps);
     if (changedProps.has('hass') && this.hass) {
+      this._updateTimerState();
+    }
+    if (changedProps.has('_config') && this.hass && this.isConnected && this._config?.entity) {
+      this._subscribeToEvents();
       this._updateTimerState();
     }
   }
@@ -322,7 +322,7 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
 
   private _localize(key: string): string {
     const rawLang = this.hass?.locale?.language || 'en';
-    const normalizedLang = rawLang.replace('_', '-').toLowerCase();
+    const normalizedLang = rawLang.replace(/_/g, '-').toLowerCase();
     const baseLang = normalizedLang.split('-')[0];
     const translations =
       TRANSLATIONS[normalizedLang] || TRANSLATIONS[baseLang] || TRANSLATIONS.en;
