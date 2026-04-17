@@ -84,9 +84,11 @@ export class SwitchForTimeCardEditor extends LitElement implements LovelaceCardE
     } else if (configValue === 'action') {
       const domain = (newConfig.entity || '').split('.')[0];
       if (domain === 'media_player' && value === 'toggle') {
-        return;
+        console.warn('switch-for-time-card-editor: media_player does not support toggle, using "on"');
+        newConfig.action = 'on';
+      } else {
+        newConfig.action = value;
       }
-      newConfig.action = value;
     } else if (configValue === 'entity') {
       newConfig.entity = value;
       const domain = (newConfig.entity || '').split('.')[0];
