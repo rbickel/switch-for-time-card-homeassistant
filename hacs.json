@@ -1,7 +1,5 @@
 {
-  "name": "Switch For Time Card",
-  "content_in_root": false,
-  "filename": "switch-for-time-card.js",
+  "name": "Switch For Time",
   "render_readme": true,
   "homeassistant": "2024.1.0"
 }

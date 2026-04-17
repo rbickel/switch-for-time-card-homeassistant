@@ -33,32 +33,47 @@ A Home Assistant custom Lovelace card + companion script package that lets you t
 
 You need both the **frontend card** AND a **backend** for this to work.
 
-### Option 1: HACS (Recommended)
+### HACS Installation (Recommended)
 
-#### Frontend Card
+This repository provides both the frontend Lovelace card and the backend Home Assistant integration in a single package.
 
 1. Open HACS in Home Assistant
-2. Click on "Frontend"
+2. Go to "Integrations"
 3. Click the menu (⋮) in the top right
 4. Select "Custom repositories"
 5. Add this repository URL: `https://github.com/rbickel/switch-for-time-card-homeassistant`
-6. Select category: "Lovelace"
+6. Select category: "Integration"
 7. Click "Add"
-8. Find "Switch For Time Card" and click "Download"
+8. Find "Switch For Time" in the integrations list and click "Download"
 9. Restart Home Assistant
+10. Go to **Settings → Devices & Services → Add Integration** and search for "Switch For Time"
+11. Add the **Switch For Time** integration via the UI
 
-#### Backend (No YAML editing, recommended)
+**Important:** The Lovelace card is automatically registered when you install and configure the integration. You do **not** need to add this repository separately as a Frontend/Lovelace repository.
 
-1. In HACS, add this same repository URL as an **Integration** custom repository.
-2. Install **Switch For Time** from HACS Integrations.
-3. Restart Home Assistant.
-4. Go to **Settings → Devices & Services → Add Integration** and add **Switch For Time**.
+After installation, you can add the card to your Lovelace dashboard. The card is available at:
+```
+/hacsfiles/switch_for_time/switch-for-time-card.js
+```
 
-This backend creates the `switch_for_time.start` and `switch_for_time.cancel` services and exposes `sensor.switch_for_time_state` for the card.
+This provides:
+- **Backend**: The `switch_for_time.start` and `switch_for_time.cancel` services and `sensor.switch_for_time_state`
+- **Frontend**: The `custom:switch-for-time-card` Lovelace card
 
-### Option 2: Manual Installation
+### Manual Installation
 
-#### Frontend Card
+#### Integration (Recommended)
+
+1. Download the latest release from [GitHub releases](https://github.com/rbickel/switch-for-time-card-homeassistant/releases)
+2. Extract the `custom_components/switch_for_time` folder to your Home Assistant `custom_components` directory
+3. Restart Home Assistant
+4. Go to **Settings → Devices & Services → Add Integration** and add **Switch For Time**
+
+The integration includes the frontend card in its `www` directory and will automatically register it.
+
+#### Legacy Frontend Card Only (Not Recommended)
+
+If you want to install just the frontend card manually:
 
 1. Download `dist/switch-for-time-card.js` from the [latest release](https://github.com/rbickel/switch-for-time-card-homeassistant/releases)
 2. Copy it to `<config>/www/switch-for-time-card.js`
@@ -70,13 +85,11 @@ This backend creates the `switch_for_time.start` and `switch_for_time.cancel` se
    ```
 4. Restart Home Assistant
 
-#### Backend
+**Note:** The frontend card alone won't work without a backend. You'll still need to install either the integration (recommended) or the legacy YAML package (see below).
 
-Use the same backend installation steps shown in **Option 1** above.
+### Legacy Backend Package (Advanced Users Only)
 
-### Option 3: Legacy Backend Package (manual)
-
-If you prefer the original YAML package backend:
+The recommended backend is the integration (installed via HACS or manually). However, if you prefer the original YAML package backend for advanced customization:
 
 1. Ensure your `configuration.yaml` includes package support:
    ```yaml
