@@ -1,0 +1,58 @@
+start:
+  name: Start timer
+  description: Start a timed action for an entity.
+  fields:
+    entity_id:
+      name: Entity
+      description: Target entity to control.
+      required: true
+      selector:
+        entity: {}
+    action:
+      name: Action
+      description: Action to perform on start.
+      required: true
+      default: toggle
+      selector:
+        select:
+          options:
+            - "on"
+            - "off"
+            - "toggle"
+    duration_minutes:
+      name: Duration
+      description: Duration in minutes before reverting.
+      required: true
+      selector:
+        number:
+          min: 1
+          max: 1440
+          mode: box
+    revert_to:
+      name: Revert to
+      description: State to revert to when timer ends.
+      default: previous
+      selector:
+        select:
+          options:
+            - "previous"
+            - "on"
+            - "off"
+            - "none"
+    cancel_existing:
+      name: Cancel existing
+      description: Cancel and replace an existing timer for the entity.
+      default: true
+      selector:
+        boolean: {}
+
+cancel:
+  name: Cancel timer
+  description: Cancel and revert the active timer for an entity.
+  fields:
+    entity_id:
+      name: Entity
+      description: Entity with active timer.
+      required: true
+      selector:
+        entity: {}

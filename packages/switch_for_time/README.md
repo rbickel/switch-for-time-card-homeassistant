@@ -1,6 +1,7 @@
 # Switch For Time - Backend Package
 
-This directory contains the Home Assistant package that provides the backend scripts and automations for the Switch For Time custom card.
+This directory contains the **legacy Home Assistant package backend** for the Switch For Time custom card.
+If you want a no-`configuration.yaml` setup, use the integration backend in `custom_components/switch_for_time` instead.
 
 ## Installation
 

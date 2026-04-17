@@ -31,7 +31,7 @@ A Home Assistant custom Lovelace card + companion script package that lets you t
 
 ### Prerequisites
 
-You need both the **frontend card** AND the **backend package** for this to work.
+You need both the **frontend card** AND a **backend** for this to work.
 
 ### Option 1: HACS (Recommended)
 
@@ -47,22 +47,14 @@ You need both the **frontend card** AND the **backend package** for this to work
 8. Find "Switch For Time Card" and click "Download"
 9. Restart Home Assistant
 
-#### Backend Package
+#### Backend (No YAML editing, recommended)
 
-1. Ensure your `configuration.yaml` includes package support:
-   ```yaml
-   homeassistant:
-     packages: !include_dir_named packages
-   ```
+1. In HACS, add this same repository URL as an **Integration** custom repository.
+2. Install **Switch For Time** from HACS Integrations.
+3. Restart Home Assistant.
+4. Go to **Settings → Devices & Services → Add Integration** and add **Switch For Time**.
 
-2. Create the packages directory if it doesn't exist:
-   ```bash
-   mkdir -p <config>/packages/switch_for_time
-   ```
-
-3. Copy `packages/switch_for_time/package.yaml` to `<config>/packages/switch_for_time/package.yaml`
-
-4. Restart Home Assistant
+This backend creates the `switch_for_time.start` and `switch_for_time.cancel` services and exposes `sensor.switch_for_time_state` for the card.
 
 ### Option 2: Manual Installation
 
@@ -78,9 +70,27 @@ You need both the **frontend card** AND the **backend package** for this to work
    ```
 4. Restart Home Assistant
 
-#### Backend Package
+#### Backend
 
-Follow the same steps as HACS installation above.
+Use the same backend installation steps shown in **Option 1** above.
+
+### Option 3: Legacy Backend Package (manual)
+
+If you prefer the original YAML package backend:
+
+1. Ensure your `configuration.yaml` includes package support:
+   ```yaml
+   homeassistant:
+     packages: !include_dir_named packages
+   ```
+
+2. Create the packages directory if it doesn't exist:
+   ```bash
+   mkdir -p <config>/packages/switch_for_time
+   ```
+
+3. Copy `packages/switch_for_time/package.yaml` to `<config>/packages/switch_for_time/package.yaml`
+4. Restart Home Assistant
 
 ## 🎨 Configuration
 
@@ -161,21 +171,24 @@ The card works with the following entity domains:
 The backend package creates the following:
 
 ### Entities
-- `input_text.switch_for_time_state` - Stores timer state (JSON)
-- `timer.switch_for_time_slot_1` through `timer.switch_for_time_slot_8` - Timer slots
+- `sensor.switch_for_time_state` - State JSON from integration backend
+- `input_text.switch_for_time_state` - State JSON from legacy package backend
+- `timer.switch_for_time_slot_1` through `timer.switch_for_time_slot_8` - Timer slots (legacy package backend)
 
-### Scripts
-- `script.switch_for_time` - Start a timed operation
-- `script.switch_for_time_cancel` - Cancel a timer
-- `script.switch_for_time_persist` - Persist state
-- `script.switch_for_time_remove_state` - Remove state
-- `script.switch_for_time_revert` - Revert entity
+### Services / Scripts
+- `switch_for_time.start` - Start a timed operation (integration backend)
+- `switch_for_time.cancel` - Cancel a timer (integration backend)
+- `script.switch_for_time` - Start a timed operation (legacy package backend)
+- `script.switch_for_time_cancel` - Cancel a timer (legacy package backend)
+- `script.switch_for_time_persist` - Persist state (legacy package backend)
+- `script.switch_for_time_remove_state` - Remove state (legacy package backend)
+- `script.switch_for_time_revert` - Revert entity (legacy package backend)
 
 ### Automations
-- `automation.switch_for_time_on_timer_finished` - Handle timer completion
-- `automation.switch_for_time_resume_on_restart` - Resume timers after restart
+- `automation.switch_for_time_on_timer_finished` - Handle timer completion (legacy package backend)
+- `automation.switch_for_time_resume_on_restart` - Resume timers after restart (legacy package backend)
 
-### Increasing Timer Slots
+### Increasing Timer Slots (legacy package backend)
 
 By default, you can have 8 concurrent timers. To increase this:
 
@@ -269,6 +282,8 @@ The built file will be in `dist/switch-for-time-card.js`.
 
 ```
 switch-for-time-card/
+├── custom_components/
+│   └── switch_for_time/            # Optional backend integration (no YAML package setup)
 ├── src/
 │   ├── switch-for-time-card.ts    # Main card component
 │   ├── editor.ts                   # Visual editor

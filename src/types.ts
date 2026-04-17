@@ -55,6 +55,12 @@ export interface HomeAssistant {
       eventType?: string
     ): Promise<() => void>;
   };
+
+  services?: {
+    [domain: string]: {
+      [service: string]: unknown;
+    };
+  };
 }
 
 export interface HassEntity {

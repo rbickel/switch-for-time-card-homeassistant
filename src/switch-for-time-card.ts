@@ -179,7 +179,9 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
 
   private _updateTimerState(): void {
     if (!this._config?.entity) return;
-    const stateEntity = this.hass?.states['input_text.switch_for_time_state'];
+    const stateEntity =
+      this.hass?.states['input_text.switch_for_time_state'] ||
+      this.hass?.states['sensor.switch_for_time_state'];
     if (!stateEntity) return;
 
     try {
@@ -275,7 +277,11 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
         serviceData.duration_minutes = durationMinutes + Math.ceil(this._remainingSeconds / 60);
       }
 
-      await this.hass.callService('script', 'switch_for_time', serviceData);
+      if (this._hasIntegrationBackend()) {
+        await this.hass.callService('switch_for_time', 'start', serviceData);
+      } else {
+        await this.hass.callService('script', 'switch_for_time', serviceData);
+      }
 
       this._handleClosePopup();
       this._showToast(
@@ -288,15 +294,25 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
 
   private async _cancelTimer(): Promise<void> {
     try {
-      await this.hass.callService('script', 'switch_for_time_cancel', {
-        entity_id: this._config.entity,
-      });
+      if (this._hasIntegrationBackend()) {
+        await this.hass.callService('switch_for_time', 'cancel', {
+          entity_id: this._config.entity,
+        });
+      } else {
+        await this.hass.callService('script', 'switch_for_time_cancel', {
+          entity_id: this._config.entity,
+        });
+      }
 
       this._handleClosePopup();
       this._showToast(this._localize('card.timer_cancelled'));
     } catch (err) {
       console.error('Failed to cancel timer:', err);
     }
+  }
+
+  private _hasIntegrationBackend(): boolean {
+    return Boolean(this.hass?.services?.switch_for_time?.start);
   }
 
   private _handleClosePopup(): void {
