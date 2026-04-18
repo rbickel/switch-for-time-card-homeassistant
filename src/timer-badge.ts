@@ -20,6 +20,23 @@ export class SwitchForTimeBadge extends LitElement {
     this._updateTimerState();
   }
 
+  protected updated(changedProperties: Map<string, unknown>): void {
+    if (!changedProperties.has('hass') && !changedProperties.has('entity')) {
+      return;
+    }
+
+    if (!this.isConnected) {
+      return;
+    }
+
+    if (this.hass && this.entity) {
+      this._subscribeToEvents();
+    } else {
+      this._unsubscribeFromEvents();
+    }
+
+    this._updateTimerState();
+  }
   disconnectedCallback(): void {
     super.disconnectedCallback();
     this._stopUpdateLoop();
