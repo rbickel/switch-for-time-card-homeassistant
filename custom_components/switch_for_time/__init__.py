@@ -7,6 +7,7 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant.components.frontend import add_extra_js_url
+from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.core import HomeAssistant, ServiceCall
@@ -63,10 +64,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register the frontend card
     await hass.http.async_register_static_paths(
         [
-            {
-                "url": CARD_URL,
-                "path": hass.config.path(f"custom_components/{DOMAIN}/www/switch-for-time-card.js"),
-            }
+            StaticPathConfig(
+                url_path=CARD_URL,
+                path=hass.config.path(f"custom_components/{DOMAIN}/www/switch-for-time-card.js"),
+                cache_headers=True,
+            )
         ]
     )
     add_extra_js_url(hass, CARD_URL)
