@@ -217,9 +217,20 @@ elements:
 
 ### Timer popup doesn't appear
 
-1. Ensure the Switch For Time integration is installed and configured
-2. Verify the frontend JavaScript is loaded (check browser console)
-3. Clear browser cache and hard refresh (Ctrl+Shift+R)
+1. **Check Browser Console**: Open browser DevTools (F12) and look for these messages:
+   - `SWITCH-FOR-TIME-CARD 1.0.0` - Main card loaded
+   - `SWITCH-FOR-TIME-ACTION Registering global timer action handler` - Action handler starting
+   - `Switch For Time: Creating action handler element` - Handler being created
+   - `Switch For Time: Action handler element added to DOM` - Handler successfully registered
+   - `Switch For Time: Global timer action handler registered` - Event listener active
+
+2. If you only see `SWITCH-FOR-TIME-CARD` but not the action handler messages:
+   - Restart Home Assistant completely
+   - Clear browser cache and hard refresh (Ctrl+Shift+R or Cmd+Shift+R)
+   - Check that the Switch For Time integration is installed and configured in Settings → Devices & Services
+
+3. Ensure the Switch For Time integration is installed and configured
+4. Verify the frontend JavaScript is loaded at `/hacsfiles/switch_for_time/switch-for-time-card.js`
 
 ### Badge doesn't show
 
