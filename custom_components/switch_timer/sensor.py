@@ -1,4 +1,4 @@
-"""Sensor platform for Switch For Time."""
+"""Sensor platform for Switch Timer."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .const import DOMAIN, SENSOR_UNIQUE_ID, SIGNAL_STATE_UPDATED
-from .manager import SwitchForTimeManager
+from .manager import SwitchTimerManager
 
 
 async def async_setup_entry(
@@ -19,19 +19,19 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up Switch For Time sensor."""
-    manager: SwitchForTimeManager = hass.data[DOMAIN][entry.entry_id]
-    async_add_entities([SwitchForTimeStateSensor(manager)], True)
+    """Set up the Switch Timer state sensor."""
+    manager: SwitchTimerManager = hass.data[DOMAIN][entry.entry_id]
+    async_add_entities([SwitchTimerStateSensor(manager)], True)
 
 
-class SwitchForTimeStateSensor(SensorEntity):
-    """Expose active timer state as JSON for frontend compatibility."""
+class SwitchTimerStateSensor(SensorEntity):
+    """Expose active timer state as JSON."""
 
-    _attr_name = "Switch For Time State"
+    _attr_name = "Switch Timer State"
     _attr_unique_id = SENSOR_UNIQUE_ID
     _attr_icon = "mdi:timer-outline"
 
-    def __init__(self, manager: SwitchForTimeManager) -> None:
+    def __init__(self, manager: SwitchTimerManager) -> None:
         self._manager = manager
 
     @property
@@ -48,7 +48,7 @@ class SwitchForTimeStateSensor(SensorEntity):
         }
 
     async def async_added_to_hass(self) -> None:
-        """Subscribe to updates."""
+        """Subscribe to state updates."""
         self.async_on_remove(
             async_dispatcher_connect(
                 self.hass,

@@ -1,38 +1,19 @@
 {
-  "name": "switch-for-time-card",
+  "name": "switch-timer-homeassistant",
   "version": "1.2.14",
-  "description": "Home Assistant custom card for timed entity switching",
-  "type": "module",
-  "main": "dist/switch-for-time-card.js",
+  "description": "Home Assistant custom integration for timed entity switching",
+  "private": true,
   "scripts": {
-    "build": "rollup -c",
-    "watch": "rollup -c --watch",
-    "lint": "eslint --no-eslintrc --parser @typescript-eslint/parser src/**/*.ts",
+    "build": "node -e \"const fs=require('fs'); const required=['custom_components/switch_timer']; const removed=['src','dist','packages','custom_components/switch_timer/www']; for (const path of required) { if (!fs.existsSync(path)) throw new Error(`Missing required path: ${path}`); } for (const path of removed) { if (fs.existsSync(path)) throw new Error(`Obsolete frontend path still exists: ${path}`); } console.log('Integration-only layout verified');\"",
+    "lint": "python -c \"import ast; from pathlib import Path; [ast.parse(path.read_text(), filename=str(path)) for root in ('custom_components/switch_timer', 'tests') for path in Path(root).rglob('*.py')]; print('Python source parsed successfully')\"",
     "test": "pytest tests/ -v"
   },
   "keywords": [
     "home-assistant",
-    "lovelace",
-    "custom-card",
+    "custom-integration",
     "timer",
     "switch"
   ],
   "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-terser": "^1.0.0",
-    "@rollup/plugin-typescript": "^11.1.6",
-    "@typescript-eslint/eslint-plugin": "^8.58.2",
-    "@typescript-eslint/parser": "^8.58.2",
-    "eslint": "^8.56.0",
-    "rollup": "^4.9.6",
-    "tslib": "^2.6.2",
-    "typescript": "^5.3.3"
-  },
-  "dependencies": {
-    "lit": "^3.3.2"
-  }
+  "license": "MIT"
 }

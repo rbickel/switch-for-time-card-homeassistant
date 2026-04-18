@@ -1,4 +1,4 @@
-"""The Switch For Time integration."""
+"""The Switch Timer integration."""
 
 from __future__ import annotations
 
@@ -6,8 +6,6 @@ from typing import Any
 
 import voluptuous as vol
 
-from homeassistant.components.frontend import add_extra_js_url
-from homeassistant.components.http import StaticPathConfig
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.core import HomeAssistant, ServiceCall
@@ -30,10 +28,9 @@ from .const import (
     SERVICE_CANCEL,
     SERVICE_START,
 )
-from .manager import SwitchForTimeManager
+from .manager import SwitchTimerManager
 
 PLATFORMS: list[str] = ["sensor"]
-CARD_URL = f"/hacsfiles/{DOMAIN}/switch-for-time-card.js"
 
 START_SCHEMA = vol.Schema(
     {
@@ -60,33 +57,21 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Switch For Time from a config entry."""
-    # Register the frontend card
-    await hass.http.async_register_static_paths(
-        [
-            StaticPathConfig(
-                url_path=CARD_URL,
-                path=hass.config.path(f"custom_components/{DOMAIN}/www/switch-for-time-card.js"),
-                cache_headers=True,
-            )
-        ]
-    )
-    add_extra_js_url(hass, CARD_URL)
-
-    manager = SwitchForTimeManager(hass)
+    """Set up Switch Timer from a config entry."""
+    manager = SwitchTimerManager(hass)
     await manager.async_initialize()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = manager
 
     async def async_handle_start(call: ServiceCall) -> None:
-        """Handle switch_for_time.start service."""
-        manager = _get_manager(hass)
-        await manager.async_start_timer(dict(call.data))
+        """Handle switch_timer.start service."""
+        current_manager = _get_manager(hass)
+        await current_manager.async_start_timer(dict(call.data))
 
     async def async_handle_cancel(call: ServiceCall) -> None:
-        """Handle switch_for_time.cancel service."""
-        manager = _get_manager(hass)
-        await manager.async_cancel_timer(call.data[ATTR_ENTITY_ID])
+        """Handle switch_timer.cancel service."""
+        current_manager = _get_manager(hass)
+        await current_manager.async_cancel_timer(call.data[ATTR_ENTITY_ID])
 
     if not hass.services.has_service(DOMAIN, SERVICE_START):
         hass.services.async_register(
@@ -112,8 +97,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
-    domain_data: dict[str, SwitchForTimeManager] | None = hass.data.get(DOMAIN)
-    manager: SwitchForTimeManager | None = None
+    domain_data: dict[str, SwitchTimerManager] | None = hass.data.get(DOMAIN)
+    manager: SwitchTimerManager | None = None
     if domain_data is not None:
         manager = domain_data.pop(entry.entry_id, None)
     if manager is not None:
@@ -128,9 +113,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
-def _get_manager(hass: HomeAssistant) -> SwitchForTimeManager:
+def _get_manager(hass: HomeAssistant) -> SwitchTimerManager:
     managers = hass.data.get(DOMAIN, {})
     if not managers:
-        raise HomeAssistantError("Switch For Time integration is not loaded")
+        raise HomeAssistantError("Switch Timer integration is not loaded")
 
     return next(iter(managers.values()))

@@ -1,4 +1,4 @@
-"""Runtime manager for Switch For Time timers."""
+"""Runtime manager for Switch Timer timers."""
 
 from __future__ import annotations
 
@@ -19,6 +19,7 @@ from .const import (
     ACTION_ON,
     ACTION_TOGGLE,
     CONF_ACTION,
+    CONF_CANCEL_EXISTING,
     CONF_DURATION_MINUTES,
     CONF_REVERT_TO,
     DOMAIN,
@@ -37,7 +38,7 @@ from .const import (
 )
 
 
-class SwitchForTimeManager:
+class SwitchTimerManager:
     """Handle timer lifecycle and persistence."""
 
     def __init__(self, hass: HomeAssistant) -> None:
@@ -53,7 +54,7 @@ class SwitchForTimeManager:
 
     @property
     def state_json(self) -> str:
-        """Return state serialized as JSON for frontend compatibility."""
+        """Return state serialized as JSON."""
         return json.dumps(self._state, separators=(",", ":"))
 
     async def async_initialize(self) -> None:
@@ -66,6 +67,10 @@ class SwitchForTimeManager:
 
         now = dt_util.utcnow()
         for entity_id, timer_info in list(self._state.items()):
+            if not isinstance(timer_info, dict):
+                await self.async_remove_state(entity_id)
+                continue
+
             ends_at = dt_util.parse_datetime(timer_info.get("ends_at", ""))
             if ends_at is None:
                 await self.async_remove_state(entity_id)
@@ -85,7 +90,7 @@ class SwitchForTimeManager:
         action: str = service_data[CONF_ACTION]
         duration_minutes: int = service_data[CONF_DURATION_MINUTES]
         revert_to: str = service_data[CONF_REVERT_TO]
-        cancel_existing: bool = service_data["cancel_existing"]
+        cancel_existing: bool = service_data[CONF_CANCEL_EXISTING]
 
         state_obj = self.hass.states.get(entity_id)
         if state_obj is None:
@@ -106,7 +111,7 @@ class SwitchForTimeManager:
 
         slot = self._allocate_slot()
         if slot == 0:
-            raise HomeAssistantError("All timer slots are currently in use")
+            raise HomeAssistantError("All switch timer slots are currently in use")
 
         now = dt_util.utcnow()
         ends_at = now + timedelta(minutes=duration_minutes)

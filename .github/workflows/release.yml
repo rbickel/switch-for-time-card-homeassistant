@@ -27,7 +27,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Bump version in manifest and HACS metadata
+      - name: Bump version in integration metadata
         id: bump
         run: |
           python - <<'PY'
@@ -36,22 +36,20 @@ jobs:
           import re
           from pathlib import Path
 
-          manifest_path = Path("custom_components/switch_for_time/manifest.json")
+          manifest_path = Path("custom_components/switch_timer/manifest.json")
           hacs_path = Path("hacs.json")
           package_path = Path("package.json")
-          types_path = Path("src/types.ts")
 
           manifest = json.loads(manifest_path.read_text())
           current = manifest["version"]
-          # Match semantic version with optional pre-release tag (e.g., 1.2.3-beta, 1.2.3-alpha.1, 1.2.3-rc.2)
           match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?", current)
           if not match:
               raise ValueError(
-                  f"Invalid version format in custom_components/switch_for_time/manifest.json. "
-                  f"Found: '{current}'. Expected: 'MAJOR.MINOR.PATCH' or 'MAJOR.MINOR.PATCH-prerelease' (e.g., '1.2.3' or '1.2.3-beta')."
+                  "Invalid version format in custom_components/switch_timer/manifest.json. "
+                  f"Found: '{current}'. Expected semantic versioning."
               )
-          major, minor, patch, prerelease = match.groups()
-          # Increment patch version and drop pre-release tag for releases
+
+          major, minor, patch, _prerelease = match.groups()
           new_version = f"{major}.{minor}.{int(patch) + 1}"
 
           manifest["version"] = new_version
@@ -59,18 +57,10 @@ jobs:
           hacs["version"] = new_version
           package = json.loads(package_path.read_text())
           package["version"] = new_version
-          types = types_path.read_text()
-          types = re.sub(
-              r"export const CARD_VERSION = '[^']+';",
-              f"export const CARD_VERSION = '{new_version}';",
-              types,
-              count=1,
-          )
 
           manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
           hacs_path.write_text(json.dumps(hacs, indent=2) + "\n")
           package_path.write_text(json.dumps(package, indent=2) + "\n")
-          types_path.write_text(types)
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               output.write(f"version={new_version}\n")
@@ -80,15 +70,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Refresh npm lockfile
         run: npm install --package-lock-only
 
-      - name: Install npm dependencies
-        run: npm ci
-
-      - name: Rebuild frontend assets
+      - name: Verify integration layout
         run: npm run build
 
       - name: Commit and tag release
@@ -97,13 +83,10 @@ jobs:
           VERSION: ${{ steps.bump.outputs.version }}
         run: |
           git add \
-            custom_components/switch_for_time/manifest.json \
+            custom_components/switch_timer/manifest.json \
             hacs.json \
             package-lock.json \
-            package.json \
-            src/types.ts \
-            dist/switch-for-time-card.js \
-            custom_components/switch_for_time/www/switch-for-time-card.js
+            package.json
           if git diff --cached --quiet; then
             echo "No release changes to commit"
             echo "released=false" >> "$GITHUB_OUTPUT"

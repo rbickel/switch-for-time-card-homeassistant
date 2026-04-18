@@ -10,7 +10,7 @@ start:
         entity: {}
     action:
       name: Action
-      description: Action to perform on start.
+      description: Action to perform when the timer starts.
       required: true
       default: toggle
       selector:
@@ -21,7 +21,7 @@ start:
             - "toggle"
     duration_minutes:
       name: Duration
-      description: Duration in minutes before reverting.
+      description: Duration in minutes before the entity is reverted.
       required: true
       selector:
         number:
@@ -30,7 +30,7 @@ start:
           mode: box
     revert_to:
       name: Revert to
-      description: State to revert to when timer ends.
+      description: State to apply when the timer ends.
       default: previous
       selector:
         select:
@@ -52,7 +52,7 @@ cancel:
   fields:
     entity_id:
       name: Entity
-      description: Entity with active timer.
+      description: Entity with an active timer.
       required: true
       selector:
         entity: {}

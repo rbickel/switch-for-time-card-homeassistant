@@ -1,0 +1,14 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Switch Timer",
+        "description": "Set up the timer services and state sensor.",
+        "data": {}
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "Only one Switch Timer integration can be configured."
+    }
+  }
+}

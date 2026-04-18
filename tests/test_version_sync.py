@@ -1,56 +1,47 @@
-"""Tests for frontend version synchronization."""
+"""Tests for repository metadata and renamed integration paths."""
+
 import json
-import re
 from pathlib import Path
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-MANIFEST_VERSION = json.loads(
-    (REPO_ROOT / "custom_components" / "switch_for_time" / "manifest.json").read_text()
-)["version"]
+MANIFEST = json.loads(
+    (REPO_ROOT / "custom_components" / "switch_timer" / "manifest.json").read_text()
+)
 
 
-def test_version_files_are_kept_in_sync():
-    """Package metadata and source version should match the integration version."""
+def test_version_files_are_kept_in_sync() -> None:
+    """Package metadata versions should match the integration version."""
     hacs_version = json.loads((REPO_ROOT / "hacs.json").read_text())["version"]
-    package_version = json.loads((REPO_ROOT / "package.json").read_text())["version"]
-    types_source = (REPO_ROOT / "src" / "types.ts").read_text()
-    types_version = re.search(
-        r"export const CARD_VERSION = '([^']+)';",
-        types_source,
+    package = json.loads((REPO_ROOT / "package.json").read_text())
+
+    assert hacs_version == MANIFEST["version"]
+    assert package["version"] == MANIFEST["version"]
+    assert package["name"] == "switch-timer-homeassistant"
+
+
+def test_metadata_uses_renamed_integration() -> None:
+    """Integration metadata should point at the renamed integration and repository."""
+    hacs = json.loads((REPO_ROOT / "hacs.json").read_text())
+
+    assert MANIFEST["domain"] == "switch_timer"
+    assert MANIFEST["name"] == "Switch Timer"
+    assert MANIFEST["documentation"] == "https://github.com/rbickel/switch-timer-homeassistant"
+    assert (
+        MANIFEST["issue_tracker"]
+        == "https://github.com/rbickel/switch-timer-homeassistant/issues"
+    )
+    assert hacs["name"] == "Switch Timer"
+
+
+def test_frontend_card_artifacts_are_removed() -> None:
+    """The repository should no longer include custom card assets."""
+    removed_paths = (
+        REPO_ROOT / "src",
+        REPO_ROOT / "dist",
+        REPO_ROOT / "packages",
+        REPO_ROOT / "custom_components" / "switch_timer" / "www",
     )
 
-    assert hacs_version == MANIFEST_VERSION
-    assert package_version == MANIFEST_VERSION
-    assert types_version is not None
-    assert types_version.group(1) == MANIFEST_VERSION
-
-
-def test_built_frontend_assets_log_current_version():
-    """Generated frontend assets should contain the current card version."""
-    expected_log = f"SWITCH-FOR-TIME-CARD %c {MANIFEST_VERSION} "
-
-    for asset_path in (
-        REPO_ROOT / "dist" / "switch-for-time-card.js",
-        REPO_ROOT
-        / "custom_components"
-        / "switch_for_time"
-        / "www"
-        / "switch-for-time-card.js",
-    ):
-        assert expected_log in asset_path.read_text()
-
-
-def test_built_frontend_assets_support_lovelace_fire_dom_event():
-    """Generated frontend assets should handle Lovelace fire-dom-event payloads."""
-    for asset_path in (
-        REPO_ROOT / "dist" / "switch-for-time-card.js",
-        REPO_ROOT
-        / "custom_components"
-        / "switch_for_time"
-        / "www"
-        / "switch-for-time-card.js",
-    ):
-        contents = asset_path.read_text()
-        assert 'll-custom' in contents
-        assert 'switch-for-time-action' in contents
+    for removed_path in removed_paths:
+        assert not removed_path.exists()

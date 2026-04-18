@@ -1,7 +1,7 @@
-"""Constants for the Switch For Time integration."""
+"""Constants for the Switch Timer integration."""
 
-DOMAIN = "switch_for_time"
-STORAGE_KEY = "switch_for_time.timers"
+DOMAIN = "switch_timer"
+STORAGE_KEY = "switch_timer.timers"
 STORAGE_VERSION = 1
 MAX_TIMERS = 8
 
@@ -17,12 +17,12 @@ SUPPORTED_DOMAINS = {
     "media_player",
 }
 
-EVENT_STARTED = "switch_for_time_started"
-EVENT_FINISHED = "switch_for_time_finished"
-EVENT_CANCELLED = "switch_for_time_cancelled"
+EVENT_STARTED = "switch_timer_started"
+EVENT_FINISHED = "switch_timer_finished"
+EVENT_CANCELLED = "switch_timer_cancelled"
 
-SENSOR_ENTITY_ID = "sensor.switch_for_time_state"
-SENSOR_UNIQUE_ID = "switch_for_time_state"
+SENSOR_ENTITY_ID = "sensor.switch_timer_state"
+SENSOR_UNIQUE_ID = "switch_timer_state"
 
 SERVICE_START = "start"
 SERVICE_CANCEL = "cancel"

@@ -1,1 +1,1 @@
-"""Tests for the Switch For Time integration."""
+"""Tests for the Switch Timer integration."""
