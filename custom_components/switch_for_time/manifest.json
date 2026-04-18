@@ -1,7 +1,7 @@
 {
   "domain": "switch_for_time",
   "name": "Switch For Time",
-  "version": "1.2.10",
+  "version": "1.2.11-beta",
   "documentation": "https://github.com/rbickel/switch-for-time-card-homeassistant",
   "issue_tracker": "https://github.com/rbickel/switch-for-time-card-homeassistant/issues",
   "dependencies": [],
