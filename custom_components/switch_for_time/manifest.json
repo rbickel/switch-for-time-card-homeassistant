@@ -4,7 +4,11 @@
   "version": "1.2.0",
   "documentation": "https://github.com/rbickel/switch-for-time-card-homeassistant",
   "issue_tracker": "https://github.com/rbickel/switch-for-time-card-homeassistant/issues",
+  "dependencies": [],
+  "requirements": [],
+  "codeowners": ["@rbickel"],
   "config_flow": true,
+  "integration_type": "service",
   "iot_class": "local_push",
   "after_dependencies": ["http"]
 }
