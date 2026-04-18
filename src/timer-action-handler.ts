@@ -4,6 +4,37 @@ import type { HomeAssistant } from './types';
 import type { TimerPopupConfig } from './timer-popup';
 import './timer-popup';
 
+type TimerActionRequest = {
+  config?: TimerPopupConfig;
+  hass?: HomeAssistant;
+};
+
+type TimerActionRequestDetail =
+  | TimerActionRequest
+  | (TimerPopupConfig & { hass?: HomeAssistant })
+  | null
+  | undefined;
+
+type FireDomEventDetail = {
+  event?: string;
+  detail?: TimerActionRequestDetail;
+};
+
+type LovelaceCustomEventDetail = {
+  fire_dom_event?: FireDomEventDetail;
+  event?: string;
+  detail?: TimerActionRequestDetail;
+};
+
+declare global {
+  interface Window {
+    switchForTimeAction?: (
+      hass: HomeAssistant,
+      config: TimerPopupConfig
+    ) => Promise<void>;
+  }
+}
+
 console.info(
   '%c SWITCH-FOR-TIME-ACTION %c Registering global timer action handler ',
   'color: white; background: #0288d1; font-weight: bold;',
@@ -39,7 +70,7 @@ export class SwitchForTimeActionHandler extends LitElement {
       return;
     }
 
-    (window as any).switchForTimeAction(hass, config);
+    void window.switchForTimeAction?.(hass, config);
   };
 
   connectedCallback(): void {
@@ -64,7 +95,7 @@ export class SwitchForTimeActionHandler extends LitElement {
     this._registered = true;
 
     // Register global function for tap_action
-    (window as any).switchForTimeAction = async (
+    window.switchForTimeAction = async (
       hass: HomeAssistant,
       config: TimerPopupConfig
     ) => {
@@ -91,14 +122,20 @@ export class SwitchForTimeActionHandler extends LitElement {
 
   private _extractActionRequest(
     event: Event
-  ): { config?: TimerPopupConfig; hass?: HomeAssistant } | undefined {
-    const detail = (event as CustomEvent).detail;
+  ): TimerActionRequest | undefined {
+    const detail = (event as CustomEvent<TimerActionRequestDetail | LovelaceCustomEventDetail>).detail;
 
     if (event.type === 'switch-for-time-action') {
-      return this._normalizeActionRequest(detail);
+      return this._normalizeActionRequest(
+        this._isLovelaceCustomEventDetail(detail) ? undefined : detail
+      );
     }
 
     if (event.type !== 'll-custom') {
+      return undefined;
+    }
+
+    if (!this._isLovelaceCustomEventDetail(detail)) {
       return undefined;
     }
 
@@ -116,21 +153,31 @@ export class SwitchForTimeActionHandler extends LitElement {
     return this._normalizeActionRequest(fireDomEventDetail);
   }
 
+  private _isLovelaceCustomEventDetail(
+    detail: TimerActionRequestDetail | LovelaceCustomEventDetail
+  ): detail is LovelaceCustomEventDetail {
+    return Boolean(
+      detail &&
+        typeof detail === 'object' &&
+        ('fire_dom_event' in detail || ('event' in detail && 'detail' in detail))
+    );
+  }
+
   private _normalizeActionRequest(
-    detail: any
-  ): { config?: TimerPopupConfig; hass?: HomeAssistant } {
+    detail: TimerActionRequestDetail
+  ): TimerActionRequest {
     if (!detail || typeof detail !== 'object') {
       return {};
     }
 
-    if (detail.config) {
+    if ('config' in detail) {
       return {
         config: detail.config as TimerPopupConfig,
         hass: detail.hass as HomeAssistant | undefined,
       };
     }
 
-    if (detail.entity && Array.isArray(detail.durations)) {
+    if ('entity' in detail && 'durations' in detail && Array.isArray(detail.durations)) {
       return {
         config: detail as TimerPopupConfig,
         hass: detail.hass as HomeAssistant | undefined,
