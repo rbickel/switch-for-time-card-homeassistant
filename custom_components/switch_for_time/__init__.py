@@ -64,10 +64,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Register the frontend card
     await hass.http.async_register_static_paths(
         [
-            {
-                "url": CARD_URL,
-                "path": hass.config.path(f"custom_components/{DOMAIN}/www/switch-for-time-card.js"),
-            }
+            StaticPathConfig(
+                url_path=CARD_URL,
+                path=hass.config.path(f"custom_components/{DOMAIN}/www/switch-for-time-card.js"),
+                cache_headers=True,
+            )
         ]
     )
     add_extra_js_url(hass, CARD_URL)
@@ -77,11 +78,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = manager
 
+    async def async_handle_start(call: ServiceCall) -> None:
+        """Handle switch_for_time.start service."""
+        manager = _get_manager(hass)
+        await manager.async_start_timer(dict(call.data))
+
+    async def async_handle_cancel(call: ServiceCall) -> None:
+        """Handle switch_for_time.cancel service."""
+        manager = _get_manager(hass)
+        await manager.async_cancel_timer(call.data[ATTR_ENTITY_ID])
+
     if not hass.services.has_service(DOMAIN, SERVICE_START):
         hass.services.async_register(
             DOMAIN,
             SERVICE_START,
-            lambda call: _async_handle_start(hass, call),
+            async_handle_start,
             schema=START_SCHEMA,
         )
 
@@ -89,7 +100,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass.services.async_register(
             DOMAIN,
             SERVICE_CANCEL,
-            lambda call: _async_handle_cancel(hass, call),
+            async_handle_cancel,
             schema=CANCEL_SCHEMA,
         )
 
@@ -115,18 +126,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             hass.services.async_remove(DOMAIN, SERVICE_CANCEL)
 
     return unload_ok
-
-
-async def _async_handle_start(hass: HomeAssistant, call: ServiceCall) -> None:
-    """Handle switch_for_time.start service."""
-    manager = _get_manager(hass)
-    await manager.async_start_timer(dict(call.data))
-
-
-async def _async_handle_cancel(hass: HomeAssistant, call: ServiceCall) -> None:
-    """Handle switch_for_time.cancel service."""
-    manager = _get_manager(hass)
-    await manager.async_cancel_timer(call.data[ATTR_ENTITY_ID])
 
 
 def _get_manager(hass: HomeAssistant) -> SwitchForTimeManager:
