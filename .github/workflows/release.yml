@@ -38,6 +38,8 @@ jobs:
 
           manifest_path = Path("custom_components/switch_for_time/manifest.json")
           hacs_path = Path("hacs.json")
+          package_path = Path("package.json")
+          types_path = Path("src/types.ts")
 
           manifest = json.loads(manifest_path.read_text())
           current = manifest["version"]
@@ -55,20 +57,43 @@ jobs:
           manifest["version"] = new_version
           hacs = json.loads(hacs_path.read_text())
           hacs["version"] = new_version
+          package = json.loads(package_path.read_text())
+          package["version"] = new_version
+          types = types_path.read_text()
+          types = re.sub(
+              r"(export const CARD_VERSION = ')([^']+)(';)",
+              rf"\g<1>{new_version}\g<3>",
+              types,
+              count=1,
+          )
 
           manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
           hacs_path.write_text(json.dumps(hacs, indent=2) + "\n")
+          package_path.write_text(json.dumps(package, indent=2) + "\n")
+          types_path.write_text(types)
 
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               output.write(f"version={new_version}\n")
           PY
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Rebuild frontend assets
+        run: npm run build
 
       - name: Commit and tag release
         id: release_commit
         env:
           VERSION: ${{ steps.bump.outputs.version }}
         run: |
-          git add custom_components/switch_for_time/manifest.json hacs.json
+          git add custom_components/switch_for_time/manifest.json hacs.json package.json src/types.ts dist/switch-for-time-card.js custom_components/switch_for_time/www/switch-for-time-card.js
           if git diff --cached --quiet; then
             echo "No release changes to commit"
             echo "released=false" >> "$GITHUB_OUTPUT"

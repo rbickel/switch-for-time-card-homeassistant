@@ -104,4 +104,4 @@ export const SUPPORTED_DOMAINS = [
   'media_player',
 ];
 
-export const CARD_VERSION = '1.2.11-beta';
+export const CARD_VERSION = '1.2.12';

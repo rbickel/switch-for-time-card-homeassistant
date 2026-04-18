@@ -218,7 +218,7 @@ elements:
 ### Timer popup doesn't appear
 
 1. **Check Browser Console**: Open browser DevTools (F12) and look for these messages:
-   - `SWITCH-FOR-TIME-CARD 1.0.0` - Main card loaded
+   - `SWITCH-FOR-TIME-CARD <current version>` - Main card loaded
    - `SWITCH-FOR-TIME-ACTION Registering global timer action handler` - Action handler starting
    - `Switch For Time: Creating action handler element` - Handler being created
    - `Switch For Time: Action handler element added to DOM` - Handler successfully registered

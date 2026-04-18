@@ -6,11 +6,18 @@ import json from '@rollup/plugin-json';
 
 export default {
   input: 'src/switch-for-time-card.ts',
-  output: {
-    file: 'dist/switch-for-time-card.js',
-    format: 'es',
-    sourcemap: false,
-  },
+  output: [
+    {
+      file: 'dist/switch-for-time-card.js',
+      format: 'es',
+      sourcemap: false,
+    },
+    {
+      file: 'custom_components/switch_for_time/www/switch-for-time-card.js',
+      format: 'es',
+      sourcemap: false,
+    },
+  ],
   plugins: [
     json(),
     resolve({
