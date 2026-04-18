@@ -59,10 +59,13 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Switch For Time from a config entry."""
     # Register the frontend card
-    hass.http.register_static_path(
-        f"/hacsfiles/switch_for_time/switch-for-time-card.js",
-        hass.config.path(f"custom_components/{DOMAIN}/www/switch-for-time-card.js"),
-        cache_headers=False,
+    await hass.http.async_register_static_paths(
+        [
+            {
+                "url": f"/hacsfiles/switch_for_time/switch-for-time-card.js",
+                "path": hass.config.path(f"custom_components/{DOMAIN}/www/switch-for-time-card.js"),
+            }
+        ]
     )
 
     manager = SwitchForTimeManager(hass)
