@@ -22,21 +22,19 @@ export class SwitchForTimeActionHandler extends LitElement {
 
   private _registerGlobalHandler(): void {
     // Register global function for tap_action
-    (window as any).switchForTimeAction = (
+    (window as any).switchForTimeAction = async (
       hass: HomeAssistant,
       config: TimerPopupConfig
     ) => {
       this._hass = hass;
       this._config = config;
       this.requestUpdate();
+      await this.updateComplete;
 
-      // Wait for popup to render then open it
-      setTimeout(() => {
-        const popup = this.shadowRoot?.querySelector('switch-for-time-popup') as any;
-        if (popup) {
-          popup.open();
-        }
-      }, 0);
+      const popup = this.shadowRoot?.querySelector('switch-for-time-popup') as any;
+      if (popup) {
+        popup.open();
+      }
     };
 
     // Listen for fire-dom-event from cards
