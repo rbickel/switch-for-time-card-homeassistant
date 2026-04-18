@@ -41,13 +41,15 @@ jobs:
 
           manifest = json.loads(manifest_path.read_text())
           current = manifest["version"]
-          match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)", current)
+          # Match semantic version with optional pre-release tag (e.g., 1.2.3-beta, 1.2.3-alpha.1, 1.2.3-rc.2)
+          match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?", current)
           if not match:
               raise ValueError(
                   f"Invalid version format in custom_components/switch_for_time/manifest.json. "
-                  f"Found: '{current}'. Expected: 'MAJOR.MINOR.PATCH' (e.g., '1.2.3')."
+                  f"Found: '{current}'. Expected: 'MAJOR.MINOR.PATCH' or 'MAJOR.MINOR.PATCH-prerelease' (e.g., '1.2.3' or '1.2.3-beta')."
               )
-          major, minor, patch = match.groups()
+          major, minor, patch, prerelease = match.groups()
+          # Increment patch version and drop pre-release tag for releases
           new_version = f"{major}.{minor}.{int(patch) + 1}"
 
           manifest["version"] = new_version
