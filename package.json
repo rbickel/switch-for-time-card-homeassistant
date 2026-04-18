@@ -4,7 +4,7 @@
   "description": "Home Assistant custom integration for timed entity switching",
   "private": true,
   "scripts": {
-    "build": "node -e \"const fs=require('fs'); const required=['custom_components/switch_timer']; const removed=['src','dist','packages','custom_components/switch_timer/www']; for (const path of required) { if (!fs.existsSync(path)) throw new Error(`Missing required path: ${path}`); } for (const path of removed) { if (fs.existsSync(path)) throw new Error(`Obsolete frontend path still exists: ${path}`); } console.log('Integration-only layout verified');\"",
+    "build": "node -e \"const fs=require('fs'); const required=['custom_components/switch_timer']; const removed=['src','dist','packages','custom_components/switch_timer/www']; for (const path of required) { if (!fs.existsSync(path)) throw new Error('Missing required path: ' + path); } for (const path of removed) { if (fs.existsSync(path)) throw new Error('Obsolete frontend path still exists: ' + path); } console.log('Integration-only layout verified');\"",
     "lint": "python -c \"import ast; from pathlib import Path; [ast.parse(path.read_text(), filename=str(path)) for root in ('custom_components/switch_timer', 'tests') for path in Path(root).rglob('*.py')]; print('Python source parsed successfully')\"",
     "test": "pytest tests/ -v"
   },
