@@ -246,8 +246,8 @@ async def test_services_call_manager(hass: HomeAssistant, mock_config_entry: Con
         # Verify the manager method was awaited by the real service handler
         mock_manager.async_cancel_timer.assert_awaited_once()
         cancel_call = mock_manager.async_cancel_timer.await_args
-        cancel_data = cancel_call.args[0] if cancel_call.args else cancel_call.kwargs
-        assert cancel_data["entity_id"] == "switch.test"
+        cancel_entity_id = cancel_call.args[0] if cancel_call.args else cancel_call.kwargs.get("entity_id")
+        assert cancel_entity_id == "switch.test"
 @pytest.mark.asyncio
 async def test_service_fails_when_integration_not_loaded(hass: HomeAssistant):
     """Test that services fail gracefully when integration is not loaded."""
