@@ -9,6 +9,9 @@ import type {
 } from './types';
 import { SUPPORTED_DOMAINS, CARD_VERSION } from './types';
 import './editor';
+import './timer-popup';
+import './timer-badge';
+import './timer-action-handler';
 import enTranslations from './localize/en.json';
 import frTranslations from './localize/fr.json';
 

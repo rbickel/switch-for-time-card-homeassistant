@@ -8,6 +8,8 @@ A Home Assistant custom Lovelace card + companion script package that lets you t
 ## ✨ Features
 
 - ⏱️ **Quick Duration Buttons**: Tap any entity and select from pre-configured durations
+- 🎯 **Works with ANY Card**: New! Add timer functionality to standard Home Assistant cards (tile, entity, button, etc.) through tap_action
+- 🏷️ **Visual Timer Badge**: Optional badge overlay shows remaining time on any card
 - 🔄 **Auto-Revert**: Automatically returns entities to their previous state after the timer
 - 💾 **Survives Restarts**: Timers persist through Home Assistant restarts
 - 🎯 **Multiple Timers**: Support for up to 8 concurrent timers (configurable)
@@ -109,7 +111,57 @@ The recommended backend is the integration (installed via HACS or manually). How
 
 ## 🎨 Configuration
 
-### Basic Example
+### Timer Action for Standard Cards (NEW!)
+
+You can now add timer functionality to ANY Home Assistant card using tap_action! No need to use the custom card if you prefer standard cards.
+
+**Quick Example with Tile Card:**
+```yaml
+type: tile
+entity: switch.shelly_plug_skimmer
+icon: mdi:pool
+vertical: false
+tap_action:
+  action: fire-dom-event
+  fire_dom_event:
+    event: switch-for-time-action
+    detail:
+      config:
+        entity: switch.shelly_plug_skimmer
+        durations: [10, 20, 30]
+        action: toggle
+        revert_to: previous
+```
+
+**With Timer Badge (shows remaining time):**
+```yaml
+type: custom:mod-card
+card:
+  type: tile
+  entity: switch.bathroom_fan
+  tap_action:
+    action: fire-dom-event
+    fire_dom_event:
+      event: switch-for-time-action
+      detail:
+        config:
+          entity: switch.bathroom_fan
+          durations: [5, 10, 15, 30]
+          action: on
+          revert_to: previous
+card_mod:
+  style: |
+    :host {
+      position: relative;
+    }
+elements:
+  - type: custom:switch-for-time-badge
+    entity: switch.bathroom_fan
+```
+
+See [EXAMPLES.md](EXAMPLES.md) for more examples with different card types!
+
+### Basic Example (Custom Card)
 
 ```yaml
 type: custom:switch-for-time-card
