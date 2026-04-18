@@ -8,7 +8,7 @@
     "build": "rollup -c",
     "watch": "rollup -c --watch",
     "lint": "eslint --no-eslintrc --parser @typescript-eslint/parser src/**/*.ts",
-    "test": "echo \"No tests yet\" && exit 0"
+    "test": "pytest tests/ -v"
   },
   "keywords": [
     "home-assistant",
