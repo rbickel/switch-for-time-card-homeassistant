@@ -1,22 +1,30 @@
 // Type definitions for Switch For Time Card
 
-export interface SwitchForTimeCardConfig {
-  type: string;
+/**
+ * Shared timer configuration fields used by both the card config and the
+ * standalone popup/action API. Extracting these into a single base interface
+ * prevents drift between the two surfaces.
+ */
+export interface TimerConfigBase {
   entity: string;
   action?: 'on' | 'off' | 'toggle';
   revert_to?: 'previous' | 'on' | 'off' | 'none';
   durations: number[];
   name?: string;
   icon?: string;
-  show_remaining?: boolean;
   allow_custom_duration?: boolean;
   confirm_cancel?: boolean;
-  tap_behavior?: 'popup' | 'immediate';
-  long_press_action?: 'none' | 'cancel';
   theme?: {
     popup_title?: string;
     button_format?: string;
   };
+}
+
+export interface SwitchForTimeCardConfig extends TimerConfigBase {
+  type: string;
+  show_remaining?: boolean;
+  tap_behavior?: 'popup' | 'immediate';
+  long_press_action?: 'none' | 'cancel';
 }
 
 export interface TimerState {
