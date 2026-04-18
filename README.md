@@ -46,10 +46,10 @@ This repository provides both the frontend Lovelace card and the backend Home As
 7. Click "Add"
 8. Find "Switch For Time" in the integrations list and click "Download"
 9. Restart Home Assistant
-10. Go to **Settings → Devices & Services → Add Integration** and search for "Switch For Time"
-11. Add the **Switch For Time** integration via the UI
+10. **IMPORTANT:** Go to **Settings → Devices & Services → Add Integration** and search for "Switch For Time"
+11. **IMPORTANT:** Add the **Switch For Time** integration via the UI - this step is required for the card to work!
 
-**Important:** The Lovelace card is automatically registered when you install and configure the integration. You do **not** need to add this repository separately as a Frontend/Lovelace repository.
+**⚠️ Critical:** The Lovelace card will **only** be loaded after you configure the integration in step 10-11. Simply downloading via HACS is not enough - you **must** add the integration via **Settings → Devices & Services**. The Lovelace card is automatically registered when you configure the integration. You do **not** need to add this repository separately as a Frontend/Lovelace repository.
 
 After installation, you can add the card to your Lovelace dashboard. The card is available at:
 ```
@@ -255,24 +255,63 @@ Set `tap_behavior: immediate` to skip the popup and use the first duration insta
 
 ## 🐛 Troubleshooting
 
+### "Custom element not found: switch-for-time-card" Error
+
+This error means the Lovelace card hasn't been loaded by Home Assistant. This typically happens when:
+
+1. **Integration Not Configured** (Most Common)
+   - The frontend card is **only** loaded when the **Switch For Time** integration is properly set up
+   - **Solution**: Go to **Settings → Devices & Services → Add Integration** and search for "Switch For Time"
+   - Add the integration - it will automatically register the custom card
+   - Refresh your browser after adding the integration
+
+2. **Integration Installed but Not Configured**
+   - You downloaded the integration via HACS but didn't add it in Settings
+   - **Solution**: Even after HACS download, you must go to **Settings → Devices & Services** and add the "Switch For Time" integration
+   - Just installing via HACS is not enough - you must configure it!
+
+3. **Browser Cache**
+   - **Solution**: Hard refresh your browser (Ctrl+Shift+R or Cmd+Shift+R)
+   - Or clear your browser cache and reload
+
+4. **Manual Installation Issue**
+   - If you installed manually, verify:
+     - `custom_components/switch_for_time/www/switch-for-time-card.js` exists
+     - The integration is added via **Settings → Devices & Services**
+     - Home Assistant was restarted after installation
+
 ### Card not showing up
-- Clear browser cache
-- Check that `dist/switch-for-time-card.js` is in the correct location
-- Verify the resource is added in Lovelace
+- Clear browser cache (Ctrl+Shift+R or Cmd+Shift+R)
+- Check that `custom_components/switch_for_time/www/switch-for-time-card.js` exists
+- Verify the integration is configured in **Settings → Devices & Services**
+- Check browser console for JavaScript errors (F12 → Console tab)
 
 ### Timer not starting
-- Check that the backend package is installed
-- Verify `input_text.switch_for_time_state` exists
-- Check Home Assistant logs for errors
+- Check that the backend integration is installed and configured
+- Verify `sensor.switch_for_time_state` exists (integration backend) OR `input_text.switch_for_time_state` exists (legacy package backend)
+- Check Home Assistant logs for errors: **Settings → System → Logs**
+- Ensure the entity you're controlling exists and is accessible
 
 ### All slots in use
 - Default is 8 concurrent timers
 - Wait for a timer to finish or cancel one
-- Or increase slots (see "Increasing Timer Slots")
+- Or increase slots (see "Increasing Timer Slots") for legacy package backend
+- Note: Integration backend automatically manages timer slots
 
 ### Timer doesn't survive restart
-- Verify `input_text.switch_for_time_state` has `restore: true` (default)
-- Check the resume automation is enabled
+- **Integration backend**: Timers persist automatically via `sensor.switch_for_time_state`
+- **Legacy package backend**: Verify `input_text.switch_for_time_state` has `restore: true` (default)
+- Check the resume automation is enabled (legacy package backend)
+
+### Still having issues?
+- Check Home Assistant logs: **Settings → System → Logs**
+- Check browser console: Press F12 → Console tab
+- Verify entity domain is supported (switch, light, input_boolean, fan, siren, humidifier, media_player)
+- Create an issue on [GitHub](https://github.com/rbickel/switch-for-time-card-homeassistant/issues) with:
+  - Home Assistant version
+  - Installation method (HACS/Manual)
+  - Browser and version
+  - Full error message from logs and browser console
 
 ## 🏗️ Development
 
