@@ -48,6 +48,7 @@ This repository provides both the frontend Lovelace card and the backend Home As
 9. Restart Home Assistant
 10. **IMPORTANT:** Go to **Settings → Devices & Services → Add Integration** and search for "Switch For Time"
 11. **IMPORTANT:** Add the **Switch For Time** integration via the UI - this step is required for the card to work!
+12. **Frontend JavaScript registration:** After step 11, the integration auto-registers the card at `/hacsfiles/switch_for_time/switch-for-time-card.js`. No manual Lovelace resource is needed. If you want to double-check, open **Settings → Dashboards → Resources** and confirm a `module` resource exists with that URL (add it if it is missing).
 
 **⚠️ Critical:** The Lovelace card will **only** be loaded after you configure the integration in step 10-11. Simply downloading via HACS is not enough - you **must** add the integration via **Settings → Devices & Services**. The Lovelace card is automatically registered when you configure the integration. You do **not** need to add this repository separately as a Frontend/Lovelace repository.
 
@@ -68,6 +69,7 @@ This provides:
 2. Extract the `custom_components/switch_for_time` folder to your Home Assistant `custom_components` directory
 3. Restart Home Assistant
 4. Go to **Settings → Devices & Services → Add Integration** and add **Switch For Time**
+5. **Frontend JavaScript registration:** The integration will register `/hacsfiles/switch_for_time/switch-for-time-card.js` for you after step 4. Verify under **Settings → Dashboards → Resources** that a `module` resource with that URL exists (add it manually if it's missing).
 
 The integration includes the frontend card in its `www` directory and will automatically register it.
 
