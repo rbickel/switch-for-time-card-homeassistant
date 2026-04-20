@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -36,9 +37,20 @@ from .manager import SwitchForTimeManager
 
 PLATFORMS: list[str] = ["sensor"]
 CARD_URL = f"/hacsfiles/{DOMAIN}/switch-for-time-card.js"
-CARD_VERSION = json.loads(
-    Path(__file__).with_name("manifest.json").read_text(encoding="utf-8")
-)["version"]
+LOGGER = logging.getLogger(__name__)
+
+
+def _get_card_version() -> str:
+    """Return frontend card version from manifest."""
+    manifest_path = Path(__file__).with_name("manifest.json")
+    try:
+        return json.loads(manifest_path.read_text(encoding="utf-8"))["version"]
+    except (OSError, json.JSONDecodeError, KeyError):
+        LOGGER.warning("Unable to read card version from manifest.json, using 'latest'")
+        return "latest"
+
+
+CARD_VERSION = _get_card_version()
 CARD_URL_VERSIONED = f"{CARD_URL}?v={CARD_VERSION}"
 
 START_SCHEMA = vol.Schema(
