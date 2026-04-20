@@ -92,10 +92,10 @@ jobs:
         run: npm run build
 
       - name: Run hassfest
-        uses: home-assistant/actions/hassfest@f6f29a7ee3fa0eccadf3620a7b9ee00ab54ec03b
+        uses: home-assistant/actions/hassfest@1.0.0
 
       - name: Run HACS validation
-        uses: hacs/action@d556e736723344f83838d08488c983a15381059a
+        uses: hacs/action@22.5.0
         with:
           category: integration
 
