@@ -91,6 +91,14 @@ jobs:
       - name: Rebuild frontend assets
         run: npm run build
 
+      - name: Run hassfest
+        uses: home-assistant/actions/hassfest@master
+
+      - name: Run HACS validation
+        uses: hacs/action@main
+        with:
+          category: integration
+
       - name: Commit and tag release
         id: release_commit
         env:
