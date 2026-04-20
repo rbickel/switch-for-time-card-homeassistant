@@ -88,6 +88,8 @@ jobs:
         run: npm run build
 
       - name: Run hassfest
+        # 1.0.0 fails with ModuleNotFoundError for script.hassfest; pin a known-good
+        # current commit until Home Assistant publishes a newer working tag.
         uses: home-assistant/actions/hassfest@f6f29a7ee3fa0eccadf3620a7b9ee00ab54ec03b
 
       - name: Run HACS validation
