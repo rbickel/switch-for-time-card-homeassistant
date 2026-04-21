@@ -1,12 +1,12 @@
-# Switch For Time - Home Assistant Package
-# This package provides the backend scripts and automations for the Switch For Time custom card
+# Toggle Timer - Home Assistant Package
+# This package provides the backend scripts and automations for the Toggle Timer custom card
 
 # ========================================
 # Input Helpers
 # ========================================
 input_text:
-  switch_for_time_state:
-    name: Switch For Time State
+  toggle_timer_state:
+    name: Toggle Timer State
     max: 255
     initial: '{}'
 
@@ -14,36 +14,36 @@ input_text:
 # Timer Helpers (8 slots by default)
 # ========================================
 timer:
-  switch_for_time_slot_1:
-    name: Switch For Time Slot 1
+  toggle_timer_slot_1:
+    name: Toggle Timer Slot 1
     restore: true
 
-  switch_for_time_slot_2:
-    name: Switch For Time Slot 2
+  toggle_timer_slot_2:
+    name: Toggle Timer Slot 2
     restore: true
 
-  switch_for_time_slot_3:
-    name: Switch For Time Slot 3
+  toggle_timer_slot_3:
+    name: Toggle Timer Slot 3
     restore: true
 
-  switch_for_time_slot_4:
-    name: Switch For Time Slot 4
+  toggle_timer_slot_4:
+    name: Toggle Timer Slot 4
     restore: true
 
-  switch_for_time_slot_5:
-    name: Switch For Time Slot 5
+  toggle_timer_slot_5:
+    name: Toggle Timer Slot 5
     restore: true
 
-  switch_for_time_slot_6:
-    name: Switch For Time Slot 6
+  toggle_timer_slot_6:
+    name: Toggle Timer Slot 6
     restore: true
 
-  switch_for_time_slot_7:
-    name: Switch For Time Slot 7
+  toggle_timer_slot_7:
+    name: Toggle Timer Slot 7
     restore: true
 
-  switch_for_time_slot_8:
-    name: Switch For Time Slot 8
+  toggle_timer_slot_8:
+    name: Toggle Timer Slot 8
     restore: true
 
 # ========================================
@@ -51,8 +51,8 @@ timer:
 # ========================================
 script:
   # Main script: Start a timed switch operation
-  switch_for_time:
-    alias: Switch For Time
+  toggle_timer:
+    alias: Toggle Timer
     mode: queued
     max: 10
     fields:
@@ -109,7 +109,7 @@ script:
           - condition: template
             value_template: '{{ cancel_existing }}'
         then:
-          - service: script.switch_for_time_cancel
+          - service: script.toggle_timer_cancel
             data:
               entity_id: '{{ entity_id }}'
 
@@ -123,7 +123,7 @@ script:
           available_slot: >
             {% set ns = namespace(slot=0) %}
             {% for i in range(1, 9) %}
-              {% if ns.slot == 0 and is_state('timer.switch_for_time_slot_' ~ i, 'idle') %}
+              {% if ns.slot == 0 and is_state('timer.toggle_timer_slot_' ~ i, 'idle') %}
                 {% set ns.slot = i %}
               {% endif %}
             {% endfor %}
@@ -136,12 +136,12 @@ script:
         then:
           - service: persistent_notification.create
             data:
-              title: Switch For Time
+              title: Toggle Timer
               message: 'All timer slots are in use. Please wait for a timer to finish.'
           - stop: 'No available timer slots'
 
       # Persist state
-      - service: script.switch_for_time_persist
+      - service: script.toggle_timer_persist
         data:
           entity_id: '{{ entity_id }}'
           slot: '{{ available_slot }}'
@@ -178,12 +178,12 @@ script:
       # Start the timer
       - service: timer.start
         target:
-          entity_id: 'timer.switch_for_time_slot_{{ available_slot }}'
+          entity_id: 'timer.toggle_timer_slot_{{ available_slot }}'
         data:
           duration: '{{ "%02d:%02d:00" | format(duration_minutes // 60, duration_minutes % 60) }}'
 
       # Fire event
-      - event: switch_for_time_started
+      - event: toggle_timer_started
         event_data:
           entity_id: '{{ entity_id }}'
           ends_at: '{{ ends_at }}'
@@ -191,8 +191,8 @@ script:
           slot: '{{ available_slot }}'
 
   # Cancel a timer for a specific entity
-  switch_for_time_cancel:
-    alias: Switch For Time Cancel
+  toggle_timer_cancel:
+    alias: Toggle Timer Cancel
     mode: parallel
     max: 10
     fields:
@@ -202,7 +202,7 @@ script:
     sequence:
       # Get current state
       - variables:
-          state_json: '{{ states("input_text.switch_for_time_state") }}'
+          state_json: '{{ states("input_text.toggle_timer_state") }}'
           state_data: '{{ state_json | from_json }}'
           timer_info: '{{ state_data.get(entity_id, {}) }}'
           slot: '{{ timer_info.get("slot", 0) }}'
@@ -214,23 +214,23 @@ script:
         then:
           - service: timer.cancel
             target:
-              entity_id: 'timer.switch_for_time_slot_{{ slot }}'
+              entity_id: 'timer.toggle_timer_slot_{{ slot }}'
 
           # Revert immediately on cancel
-          - service: script.switch_for_time_revert
+          - service: script.toggle_timer_revert
             data:
               entity_id: '{{ entity_id }}'
               slot: '{{ slot }}'
               fire_event: false
 
           # Fire event
-          - event: switch_for_time_cancelled
+          - event: toggle_timer_cancelled
             event_data:
               entity_id: '{{ entity_id }}'
 
   # Persist timer state
-  switch_for_time_persist:
-    alias: Switch For Time Persist
+  toggle_timer_persist:
+    alias: Toggle Timer Persist
     mode: parallel
     max: 10
     fields:
@@ -250,7 +250,7 @@ script:
         required: true
     sequence:
       - variables:
-          current_state: '{{ states("input_text.switch_for_time_state") }}'
+          current_state: '{{ states("input_text.toggle_timer_state") }}'
           state_data: '{{ current_state | from_json if current_state != "" else {} }}'
           new_entry:
             slot: '{{ slot }}'
@@ -263,15 +263,15 @@ script:
 
       - service: input_text.set_value
         target:
-          entity_id: input_text.switch_for_time_state
+          entity_id: input_text.toggle_timer_state
         data:
           value: >
             {% set new_state = dict(state_data, **{entity_id: new_entry}) %}
             {{ new_state | to_json }}
 
   # Remove entity from state
-  switch_for_time_remove_state:
-    alias: Switch For Time Remove State
+  toggle_timer_remove_state:
+    alias: Toggle Timer Remove State
     mode: parallel
     max: 10
     fields:
@@ -279,12 +279,12 @@ script:
         required: true
     sequence:
       - variables:
-          current_state: '{{ states("input_text.switch_for_time_state") }}'
+          current_state: '{{ states("input_text.toggle_timer_state") }}'
           state_data: '{{ current_state | from_json if current_state != "" else {} }}'
 
       - service: input_text.set_value
         target:
-          entity_id: input_text.switch_for_time_state
+          entity_id: input_text.toggle_timer_state
         data:
           value: >
             {% set ns = namespace(result={}) %}
@@ -296,8 +296,8 @@ script:
             {{ ns.result | to_json }}
 
   # Revert an entity to its target state
-  switch_for_time_revert:
-    alias: Switch For Time Revert
+  toggle_timer_revert:
+    alias: Toggle Timer Revert
     mode: parallel
     max: 10
     fields:
@@ -311,7 +311,7 @@ script:
     sequence:
       # Get timer info
       - variables:
-          state_json: '{{ states("input_text.switch_for_time_state") }}'
+          state_json: '{{ states("input_text.toggle_timer_state") }}'
           state_data: '{{ state_json | from_json }}'
           timer_info: '{{ state_data.get(entity_id, {}) }}'
           revert_to: '{{ timer_info.get("revert_to", "previous") }}'
@@ -350,7 +350,7 @@ script:
                   entity_id: '{{ entity_id }}'
 
       # Remove from state
-      - service: script.switch_for_time_remove_state
+      - service: script.toggle_timer_remove_state
         data:
           entity_id: '{{ entity_id }}'
 
@@ -359,7 +359,7 @@ script:
           - condition: template
             value_template: '{{ fire_event }}'
         then:
-          - event: switch_for_time_finished
+          - event: toggle_timer_finished
             event_data:
               entity_id: '{{ entity_id }}'
 
@@ -368,49 +368,49 @@ script:
 # ========================================
 automation:
   # Handle timer finished events
-  - id: switch_for_time_on_timer_finished
-    alias: Switch For Time - On Timer Finished
+  - id: toggle_timer_on_timer_finished
+    alias: Toggle Timer - On Timer Finished
     mode: parallel
     max: 10
     trigger:
       - platform: event
         event_type: timer.finished
         event_data:
-          entity_id: timer.switch_for_time_slot_1
+          entity_id: timer.toggle_timer_slot_1
       - platform: event
         event_type: timer.finished
         event_data:
-          entity_id: timer.switch_for_time_slot_2
+          entity_id: timer.toggle_timer_slot_2
       - platform: event
         event_type: timer.finished
         event_data:
-          entity_id: timer.switch_for_time_slot_3
+          entity_id: timer.toggle_timer_slot_3
       - platform: event
         event_type: timer.finished
         event_data:
-          entity_id: timer.switch_for_time_slot_4
+          entity_id: timer.toggle_timer_slot_4
       - platform: event
         event_type: timer.finished
         event_data:
-          entity_id: timer.switch_for_time_slot_5
+          entity_id: timer.toggle_timer_slot_5
       - platform: event
         event_type: timer.finished
         event_data:
-          entity_id: timer.switch_for_time_slot_6
+          entity_id: timer.toggle_timer_slot_6
       - platform: event
         event_type: timer.finished
         event_data:
-          entity_id: timer.switch_for_time_slot_7
+          entity_id: timer.toggle_timer_slot_7
       - platform: event
         event_type: timer.finished
         event_data:
-          entity_id: timer.switch_for_time_slot_8
+          entity_id: timer.toggle_timer_slot_8
     action:
       # Find which entity is using this slot
       - variables:
           slot_number: >
             {{ trigger.event.data.entity_id.split('_')[-1] }}
-          state_json: '{{ states("input_text.switch_for_time_state") }}'
+          state_json: '{{ states("input_text.toggle_timer_state") }}'
           state_data: '{{ state_json | from_json }}'
           matching_entity: >
             {% set ns = namespace(entity='') %}
@@ -426,14 +426,14 @@ automation:
           - condition: template
             value_template: '{{ matching_entity != "" }}'
         then:
-          - service: script.switch_for_time_revert
+          - service: script.toggle_timer_revert
             data:
               entity_id: '{{ matching_entity }}'
               slot: '{{ slot_number }}'
 
   # Resume timers on Home Assistant restart
-  - id: switch_for_time_resume_on_restart
-    alias: Switch For Time - Resume On Restart
+  - id: toggle_timer_resume_on_restart
+    alias: Toggle Timer - Resume On Restart
     trigger:
       - platform: homeassistant
         event: start
@@ -441,7 +441,7 @@ automation:
       - delay: '00:00:05'  # Wait for entities to be available
 
       - variables:
-          state_json: '{{ states("input_text.switch_for_time_state") }}'
+          state_json: '{{ states("input_text.toggle_timer_state") }}'
           state_data: '{{ state_json | from_json if state_json != "" else {} }}'
 
       # Process each timer
@@ -463,7 +463,7 @@ automation:
                 - condition: template
                   value_template: '{{ remaining_seconds <= 0 }}'
               then:
-                - service: script.switch_for_time_revert
+                - service: script.toggle_timer_revert
                   data:
                     entity_id: '{{ entity_id }}'
                     slot: '{{ slot }}'
@@ -471,6 +471,6 @@ automation:
                 # Restart timer with remaining time
                 - service: timer.start
                   target:
-                    entity_id: 'timer.switch_for_time_slot_{{ slot }}'
+                    entity_id: 'timer.toggle_timer_slot_{{ slot }}'
                   data:
                     duration: '{{ "%d:%02d:%02d" | format(remaining_seconds_int // 3600, (remaining_seconds_int % 3600) // 60, remaining_seconds_int % 60) }}'

@@ -1,4 +1,4 @@
-# switch-for-time
+# toggle-timer
 
 A Home Assistant custom Lovelace card + companion script package that lets the user tap any entity, pick a duration from quick-buttons in a popup, and toggle that entity (on / off / toggle) for the chosen duration before reverting it automatically.
 
@@ -24,16 +24,16 @@ A Home Assistant custom Lovelace card + companion script package that lets the u
 ## 2. Repository layout
 
 ```
-switch-for-time/
+toggle-timer/
 ├── README.md
 ├── SPEC.md                          # this file
 ├── hacs.json                        # HACS metadata (frontend + integration)
 ├── info.md                          # HACS info card
 ├── LICENSE
 ├── dist/
-│   └── switch-for-time-card.js      # built custom card (HACS frontend artifact)
+│   └── toggle-timer-card.js      # built custom card (HACS frontend artifact)
 ├── src/
-│   ├── switch-for-time-card.ts      # custom card source (Lit + TS)
+│   ├── toggle-timer-card.ts      # custom card source (Lit + TS)
 │   ├── editor.ts                    # GUI editor for the card
 │   ├── types.ts                     # shared type defs
 │   └── localize/
@@ -43,12 +43,12 @@ switch-for-time/
 ├── tsconfig.json
 ├── rollup.config.js
 └── packages/
-    └── switch_for_time/
+    └── toggle_timer/
         ├── package.yaml             # HA package: script + helpers
         └── README.md                # install instructions for the backend
 ```
 
-The `dist/switch-for-time-card.js` file is what HACS installs as a Lovelace resource. The `packages/switch_for_time/package.yaml` is what the user includes via `homeassistant.packages` in their `configuration.yaml`.
+The `dist/toggle-timer-card.js` file is what HACS installs as a Lovelace resource. The `packages/toggle_timer/package.yaml` is what the user includes via `homeassistant.packages` in their `configuration.yaml`.
 
 ---
 
@@ -58,11 +58,11 @@ The `dist/switch-for-time-card.js` file is what HACS installs as a Lovelace reso
 
 | Entity ID | Type | Purpose |
 |---|---|---|
-| `input_text.switch_for_time_state` | input_text (max 255) | JSON blob storing per-entity timer state so it survives restarts. Keyed by `entity_id`. |
+| `input_text.toggle_timer_state` | input_text (max 255) | JSON blob storing per-entity timer state so it survives restarts. Keyed by `entity_id`. |
 
-> Why `input_text` and not a custom integration: keeps the package install pure-YAML, no Python. If the JSON exceeds 255 chars (many concurrent timers), we shard across `input_text.switch_for_time_state_2`, `_3`, … (see §3.4). For v1, document the 255-char limit and warn if exceeded.
+> Why `input_text` and not a custom integration: keeps the package install pure-YAML, no Python. If the JSON exceeds 255 chars (many concurrent timers), we shard across `input_text.toggle_timer_state_2`, `_3`, … (see §3.4). For v1, document the 255-char limit and warn if exceeded.
 
-### 3.2 Script: `script.switch_for_time`
+### 3.2 Script: `script.toggle_timer`
 
 **Fields:**
 
@@ -81,18 +81,18 @@ sequence:
   # 1. If a timer for this entity already exists, cancel it (script + timer helper).
   - if: "{{ cancel_existing and entity_has_active_timer(entity_id) }}"
     then:
-      - service: script.switch_for_time_cancel
+      - service: script.toggle_timer_cancel
         data:
           entity_id: "{{ entity_id }}"
 
   # 2. Capture current state for revert.
   - variables:
       previous_state: "{{ states(entity_id) }}"
-      timer_id: "switch_for_time_{{ entity_id | replace('.', '_') }}"
+      timer_id: "toggle_timer_{{ entity_id | replace('.', '_') }}"
       ends_at: "{{ (now() + timedelta(minutes=duration_minutes)).isoformat() }}"
 
   # 3. Persist state (so we survive restarts).
-  - service: script.switch_for_time_persist
+  - service: script.toggle_timer_persist
     data:
       entity_id: "{{ entity_id }}"
       previous_state: "{{ previous_state }}"
@@ -117,12 +117,12 @@ sequence:
   # 5. Start a dynamically-created timer helper (timer.start with duration override).
   - service: timer.start
     target:
-      entity_id: timer.switch_for_time_runtime
+      entity_id: timer.toggle_timer_runtime
     data:
       duration: "{{ '%02d:%02d:00' | format(duration_minutes // 60, duration_minutes % 60) }}"
 
   # 6. Fire an event so the frontend can update without polling.
-  - event: switch_for_time_started
+  - event: toggle_timer_started
     event_data:
       entity_id: "{{ entity_id }}"
       ends_at: "{{ ends_at }}"
@@ -131,24 +131,24 @@ sequence:
 
 > **Implementation note on timers:** Home Assistant `timer` helpers are static. For per-entity timers we have two options:
 >
-> - **(A) One shared timer + queue:** single `timer.switch_for_time_runtime`, but only supports one active timer at a time. Simple, but a real limitation.
-> - **(B) Dynamic timers via the new `timer` integration features:** since HA 2024.x, timers can be created at runtime via the helpers UI but **not via YAML at runtime**. So we instead create N pre-allocated timers (`timer.switch_for_time_slot_1` … `_slot_8`) and a slot-allocation script picks a free one.
+> - **(A) One shared timer + queue:** single `timer.toggle_timer_runtime`, but only supports one active timer at a time. Simple, but a real limitation.
+> - **(B) Dynamic timers via the new `timer` integration features:** since HA 2024.x, timers can be created at runtime via the helpers UI but **not via YAML at runtime**. So we instead create N pre-allocated timers (`timer.toggle_timer_slot_1` … `_slot_8`) and a slot-allocation script picks a free one.
 >
 > **Decision: implement (B) with 8 slots by default**, configurable via `slot_count` in the package include. Document how to raise it.
 
 ### 3.3 Companion scripts
 
-- `script.switch_for_time_cancel` — takes `entity_id`, finds the slot timer, cancels it, removes persisted state, fires `switch_for_time_cancelled` event.
-- `script.switch_for_time_persist` — writes JSON to `input_text.switch_for_time_state`.
-- `script.switch_for_time_revert` — called by the automation below when a slot timer fires; reads persisted state, applies `revert_to`, clears the slot.
+- `script.toggle_timer_cancel` — takes `entity_id`, finds the slot timer, cancels it, removes persisted state, fires `toggle_timer_cancelled` event.
+- `script.toggle_timer_persist` — writes JSON to `input_text.toggle_timer_state`.
+- `script.toggle_timer_revert` — called by the automation below when a slot timer fires; reads persisted state, applies `revert_to`, clears the slot.
 
-### 3.4 Automation: `automation.switch_for_time_on_timer_finished`
+### 3.4 Automation: `automation.toggle_timer_on_timer_finished`
 
-Triggers on `event_type: timer.finished` for any `timer.switch_for_time_slot_*`. Action: call `script.switch_for_time_revert` with the slot id. Looks up which `entity_id` was assigned to that slot in `input_text.switch_for_time_state`, applies the configured revert, fires `switch_for_time_finished` event.
+Triggers on `event_type: timer.finished` for any `timer.toggle_timer_slot_*`. Action: call `script.toggle_timer_revert` with the slot id. Looks up which `entity_id` was assigned to that slot in `input_text.toggle_timer_state`, applies the configured revert, fires `toggle_timer_finished` event.
 
-### 3.5 Automation: `automation.switch_for_time_resume_on_restart`
+### 3.5 Automation: `automation.toggle_timer_resume_on_restart`
 
-Triggers on `homeassistant.start`. Reads `input_text.switch_for_time_state`, for every entry whose `ends_at` is still in the future, restarts the matching slot timer with the remaining duration. For entries whose `ends_at` is in the past, immediately calls `script.switch_for_time_revert`.
+Triggers on `homeassistant.start`. Reads `input_text.toggle_timer_state`, for every entry whose `ends_at` is still in the future, restarts the matching slot timer with the remaining duration. For entries whose `ends_at` is in the past, immediately calls `script.toggle_timer_revert`.
 
 ### 3.6 State JSON schema
 
@@ -180,14 +180,14 @@ The card validates the configured `entity` against this list and shows a config 
 
 ### 5.1 Card identity
 
-- Custom element name: `switch-for-time-card`
+- Custom element name: `toggle-timer-card`
 - HACS category: `plugin`
-- Registered in `customCards` window registry with name "Switch For Time" and description "Tap an entity, pick a duration, auto-revert."
+- Registered in `customCards` window registry with name "Toggle Timer" and description "Tap an entity, pick a duration, auto-revert."
 
 ### 5.2 Card YAML config schema
 
 ```yaml
-type: custom:switch-for-time-card
+type: custom:toggle-timer-card
 entity: switch.living_room_lamp        # required
 action: toggle                          # on | off | toggle  (default: toggle)
 revert_to: previous                     # previous | on | off | none (default: previous)
@@ -228,12 +228,12 @@ A modal dialog using `mwc-dialog` (or `ha-dialog` if available), opened on tap. 
 
 Clicking a duration button:
 1. Closes the popup.
-2. Calls `hass.callService('script', 'switch_for_time', { entity_id, action, duration_minutes, revert_to })`.
+2. Calls `hass.callService('script', 'toggle_timer', { entity_id, action, duration_minutes, revert_to })`.
 3. Shows a brief toast: "Timer started: 30 min".
 
 ### 5.6 Render when timer is active
 
-Detect active timer by listening to `switch_for_time_started` / `switch_for_time_finished` / `switch_for_time_cancelled` events on the HA WebSocket, plus reading `input_text.switch_for_time_state` on initial render.
+Detect active timer by listening to `toggle_timer_started` / `toggle_timer_finished` / `toggle_timer_cancelled` events on the HA WebSocket, plus reading `input_text.toggle_timer_state` on initial render.
 
 When active, the card row shows:
 - Icon with a subtle pulsing dot overlay.
@@ -247,8 +247,8 @@ If `long_press_action: cancel` and a timer is active, long-press cancels it dire
 ### 5.8 Events listened to
 
 - `state_changed` for the configured entity (to refresh state display).
-- `state_changed` for `input_text.switch_for_time_state` (to refresh active timer state).
-- Custom events `switch_for_time_started`, `switch_for_time_finished`, `switch_for_time_cancelled`.
+- `state_changed` for `input_text.toggle_timer_state` (to refresh active timer state).
+- Custom events `toggle_timer_started`, `toggle_timer_finished`, `toggle_timer_cancelled`.
 
 ### 5.9 i18n
 
@@ -258,9 +258,9 @@ Strings in `src/localize/{lang}.json`. Card auto-detects from `hass.locale.langu
 
 ## 6. Install flow (end-user)
 
-1. Add this repo to HACS as a custom repository (category: Integration). Install "Switch For Time".
-2. Add to HACS as a custom repository (category: Frontend) for the card. Install "Switch For Time Card".
-3. In `configuration.yaml`, ensure `homeassistant: packages: !include_dir_named packages` is set, and copy `packages/switch_for_time/package.yaml` to `<config>/packages/switch_for_time.yaml`.
+1. Add this repo to HACS as a custom repository (category: Integration). Install "Toggle Timer".
+2. Add to HACS as a custom repository (category: Frontend) for the card. Install "Toggle Timer Card".
+3. In `configuration.yaml`, ensure `homeassistant: packages: !include_dir_named packages` is set, and copy `packages/toggle_timer/package.yaml` to `<config>/packages/toggle_timer.yaml`.
 4. Restart HA.
 5. Add the card to a dashboard via the GUI editor or YAML.
 
@@ -278,7 +278,7 @@ A v1 release is considered complete when **all** of the following hold:
 4. If HA is restarted mid-timer, the timer resumes with the correct remaining duration on next start.
 5. If the timer's `ends_at` passed during downtime, the entity is reverted on next start.
 6. Re-tapping a card with an active timer offers cancel/replace/extend, and each works as specified.
-7. Up to 8 concurrent timers across different entities work correctly. Attempting a 9th surfaces a non-fatal notification: "All switch-for-time slots are in use."
+7. Up to 8 concurrent timers across different entities work correctly. Attempting a 9th surfaces a non-fatal notification: "All toggle-timer slots are in use."
 8. The GUI editor produces valid YAML and rejects invalid `durations` / `entity` values inline.
 9. Card renders correctly in light, dark, and a custom community theme without hard-coded colors.
 10. The package YAML passes `hassfest` and `ha core check` linting; the card source passes `eslint` + `tsc --noEmit`.

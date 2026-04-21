@@ -16,8 +16,8 @@ const TRANSLATIONS: Record<string, any> = {
 
 export type TimerPopupConfig = TimerConfigBase;
 
-@customElement('switch-for-time-popup')
-export class SwitchForTimePopup extends LitElement {
+@customElement('toggle-timer-popup')
+export class ToggleTimerPopup extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @property({ type: Object }) public config!: TimerPopupConfig;
 
@@ -63,8 +63,8 @@ export class SwitchForTimePopup extends LitElement {
   private _updateTimerState(): void {
     if (!this.config?.entity) return;
     const stateEntity =
-      this.hass?.states['input_text.switch_for_time_state'] ||
-      this.hass?.states['sensor.switch_for_time_state'];
+      this.hass?.states['input_text.toggle_timer_state'] ||
+      this.hass?.states['sensor.toggle_timer_state'];
     if (!stateEntity) return;
 
     try {
@@ -126,9 +126,9 @@ export class SwitchForTimePopup extends LitElement {
       }
 
       if (this._hasIntegrationBackend()) {
-        await this.hass.callService('switch_for_time', 'start', serviceData);
+        await this.hass.callService('toggle_timer', 'start', serviceData);
       } else {
-        await this.hass.callService('script', 'switch_for_time', serviceData);
+        await this.hass.callService('script', 'toggle_timer', serviceData);
       }
 
       this.close();
@@ -143,11 +143,11 @@ export class SwitchForTimePopup extends LitElement {
   private async _cancelTimer(): Promise<void> {
     try {
       if (this._hasIntegrationBackend()) {
-        await this.hass.callService('switch_for_time', 'cancel', {
+        await this.hass.callService('toggle_timer', 'cancel', {
           entity_id: this.config.entity,
         });
       } else {
-        await this.hass.callService('script', 'switch_for_time_cancel', {
+        await this.hass.callService('script', 'toggle_timer_cancel', {
           entity_id: this.config.entity,
         });
       }
@@ -160,7 +160,7 @@ export class SwitchForTimePopup extends LitElement {
   }
 
   private _hasIntegrationBackend(): boolean {
-    return Boolean(this.hass?.services?.switch_for_time?.start);
+    return Boolean(this.hass?.services?.toggle_timer?.start);
   }
 
   private _showToast(message: string): void {

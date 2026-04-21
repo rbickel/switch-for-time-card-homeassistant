@@ -1,10 +1,10 @@
 # Timer Action Examples
 
-This document provides examples of using the Switch For Time timer action with standard Home Assistant cards.
+This document provides examples of using the Toggle Timer timer action with standard Home Assistant cards.
 
 ## Overview
 
-With the new timer action feature, you can add timer functionality to ANY existing Home Assistant card (tile, entity, button, etc.) without needing to use the custom `switch-for-time-card`. This allows you to:
+With the new timer action feature, you can add timer functionality to ANY existing Home Assistant card (tile, entity, button, etc.) without needing to use the custom `toggle-timer-card`. This allows you to:
 
 - Add timer popups to standard cards through `tap_action`
 - Show timer badges on any card to display remaining time
@@ -33,7 +33,7 @@ tap_action:
     title: Timer
     content:
       type: custom
-      custom: switch-for-time-popup
+      custom: toggle-timer-popup
       entity: switch.shelly_plug_skimmer
       durations:
         - 10
@@ -73,7 +73,7 @@ entity: switch.pool_pump
 tap_action:
   action: fire-dom-event
   fire_dom_event:
-    event: switch-for-time-action
+    event: toggle-timer-action
     detail:
       config:
         entity: switch.pool_pump
@@ -97,7 +97,7 @@ card:
   tap_action:
     action: fire-dom-event
     fire_dom_event:
-      event: switch-for-time-action
+      event: toggle-timer-action
       detail:
         config:
           entity: light.living_room
@@ -110,7 +110,7 @@ card_mod:
       position: relative;
     }
 extra_entity:
-  type: custom:switch-for-time-badge
+  type: custom:toggle-timer-badge
   entity: light.living_room
 ```
 
@@ -122,7 +122,7 @@ entity: fan.bedroom_fan
 tap_action:
   action: fire-dom-event
   fire_dom_event:
-    event: switch-for-time-action
+    event: toggle-timer-action
     detail:
       config:
         entity: fan.bedroom_fan
@@ -142,7 +142,7 @@ cards:
     tap_action:
       action: fire-dom-event
       fire_dom_event:
-        event: switch-for-time-action
+        event: toggle-timer-action
         detail:
           config:
             entity: switch.outlet_1
@@ -153,7 +153,7 @@ cards:
     tap_action:
       action: fire-dom-event
       fire_dom_event:
-        event: switch-for-time-action
+        event: toggle-timer-action
         detail:
           config:
             entity: switch.outlet_2
@@ -187,7 +187,7 @@ card:
   tap_action:
     action: fire-dom-event
     fire_dom_event:
-      event: switch-for-time-action
+      event: toggle-timer-action
       detail:
         config:
           entity: switch.irrigation_system
@@ -202,14 +202,14 @@ card_mod:
     :host {
       position: relative;
     }
-    switch-for-time-badge {
+    toggle-timer-badge {
       position: absolute;
       top: 8px;
       right: 8px;
       z-index: 999;
     }
 elements:
-  - type: custom:switch-for-time-badge
+  - type: custom:toggle-timer-badge
     entity: switch.irrigation_system
 ```
 
@@ -218,19 +218,19 @@ elements:
 ### Timer popup doesn't appear
 
 1. **Check Browser Console**: Open browser DevTools (F12) and look for these messages:
-   - `SWITCH-FOR-TIME-CARD <current version>` - Main card loaded
-   - `SWITCH-FOR-TIME-ACTION Registering global timer action handler` - Action handler starting
-   - `Switch For Time: Creating action handler element` - Handler being created
-   - `Switch For Time: Action handler element added to DOM` - Handler successfully registered
-   - `Switch For Time: Global timer action handler registered` - Event listener active
+   - `TOGGLE-TIMER-CARD <current version>` - Main card loaded
+   - `TOGGLE-TIMER-ACTION Registering global timer action handler` - Action handler starting
+   - `Toggle Timer: Creating action handler element` - Handler being created
+   - `Toggle Timer: Action handler element added to DOM` - Handler successfully registered
+   - `Toggle Timer: Global timer action handler registered` - Event listener active
 
-2. If you only see `SWITCH-FOR-TIME-CARD` but not the action handler messages:
+2. If you only see `TOGGLE-TIMER-CARD` but not the action handler messages:
    - Restart Home Assistant completely
    - Clear browser cache and hard refresh (Ctrl+Shift+R or Cmd+Shift+R)
-   - Check that the Switch For Time integration is installed and configured in Settings → Devices & Services
+   - Check that the Toggle Timer integration is installed and configured in Settings → Devices & Services
 
-3. Ensure the Switch For Time integration is installed and configured
-4. Verify the frontend JavaScript is loaded at `/hacsfiles/switch_for_time/switch-for-time-card.js`
+3. Ensure the Toggle Timer integration is installed and configured
+4. Verify the frontend JavaScript is loaded at `/hacsfiles/toggle_timer/toggle-timer-card.js`
 
 ### Badge doesn't show
 
@@ -244,13 +244,13 @@ elements:
 2. Try using the `browser_mod.javascript` approach instead
 3. Ensure you're passing the correct configuration format
 
-## Migration from custom:switch-for-time-card
+## Migration from custom:toggle-timer-card
 
 If you're currently using the custom card, you can migrate to standard cards:
 
 **Before:**
 ```yaml
-type: custom:switch-for-time-card
+type: custom:toggle-timer-card
 entity: switch.fan
 durations: [10, 20, 30]
 action: on
@@ -264,7 +264,7 @@ entity: switch.fan
 tap_action:
   action: fire-dom-event
   fire_dom_event:
-    event: switch-for-time-action
+    event: toggle-timer-action
     detail:
       config:
         entity: switch.fan

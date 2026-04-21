@@ -6,7 +6,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MANIFEST_VERSION = json.loads(
-    (REPO_ROOT / "custom_components" / "switch_for_time" / "manifest.json").read_text()
+    (REPO_ROOT / "custom_components" / "toggle_timer" / "manifest.json").read_text()
 )["version"]
 
 
@@ -26,15 +26,15 @@ def test_version_files_are_kept_in_sync():
 
 def test_built_frontend_assets_log_current_version():
     """Generated frontend assets should contain the current card version."""
-    expected_log = f"SWITCH-FOR-TIME-CARD %c {MANIFEST_VERSION} "
+    expected_log = f"TOGGLE-TIMER-CARD %c {MANIFEST_VERSION} "
 
     for asset_path in (
-        REPO_ROOT / "dist" / "switch-for-time-card.js",
+        REPO_ROOT / "dist" / "toggle-timer-card.js",
         REPO_ROOT
         / "custom_components"
-        / "switch_for_time"
+        / "toggle_timer"
         / "www"
-        / "switch-for-time-card.js",
+        / "toggle-timer-card.js",
     ):
         assert expected_log in asset_path.read_text()
 
@@ -42,13 +42,13 @@ def test_built_frontend_assets_log_current_version():
 def test_built_frontend_assets_support_lovelace_fire_dom_event():
     """Generated frontend assets should handle Lovelace fire-dom-event payloads."""
     for asset_path in (
-        REPO_ROOT / "dist" / "switch-for-time-card.js",
+        REPO_ROOT / "dist" / "toggle-timer-card.js",
         REPO_ROOT
         / "custom_components"
-        / "switch_for_time"
+        / "toggle_timer"
         / "www"
-        / "switch-for-time-card.js",
+        / "toggle-timer-card.js",
     ):
         contents = asset_path.read_text()
         assert 'll-custom' in contents
-        assert 'switch-for-time-action' in contents
+        assert 'toggle-timer-action' in contents

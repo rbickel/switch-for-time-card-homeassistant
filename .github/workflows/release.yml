@@ -36,7 +36,7 @@ jobs:
           import re
           from pathlib import Path
 
-          manifest_path = Path("custom_components/switch_for_time/manifest.json")
+          manifest_path = Path("custom_components/toggle_timer/manifest.json")
           package_path = Path("package.json")
           types_path = Path("src/types.ts")
 
@@ -46,7 +46,7 @@ jobs:
           match = re.fullmatch(r"(\d+)\.(\d+)\.(\d+)(?:-([a-zA-Z0-9.-]+))?", current)
           if not match:
               raise ValueError(
-                  f"Invalid version format in custom_components/switch_for_time/manifest.json. "
+                  f"Invalid version format in custom_components/toggle_timer/manifest.json. "
                   f"Found: '{current}'. Expected: 'MAJOR.MINOR.PATCH' or 'MAJOR.MINOR.PATCH-prerelease' (e.g., '1.2.3' or '1.2.3-beta')."
               )
           major, minor, patch, prerelease = match.groups()
@@ -104,12 +104,12 @@ jobs:
           VERSION: ${{ steps.bump.outputs.version }}
         run: |
           git add \
-            custom_components/switch_for_time/manifest.json \
+            custom_components/toggle_timer/manifest.json \
             package-lock.json \
             package.json \
             src/types.ts \
-            dist/switch-for-time-card.js \
-            custom_components/switch_for_time/www/switch-for-time-card.js
+            dist/toggle-timer-card.js \
+            custom_components/toggle_timer/www/toggle-timer-card.js
           if git diff --cached --quiet; then
             echo "No release changes to commit"
             echo "released=false" >> "$GITHUB_OUTPUT"

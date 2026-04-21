@@ -1,10 +1,10 @@
-"""End-to-end integration test for Switch For Time."""
+"""End-to-end integration test for Toggle Timer."""
 from pathlib import Path
 import pytest
 from homeassistant.core import HomeAssistant
 from homeassistant.setup import async_setup_component
 
-from custom_components.switch_for_time.const import DOMAIN
+from custom_components.toggle_timer.const import DOMAIN
 
 
 @pytest.mark.asyncio
@@ -19,7 +19,7 @@ async def test_integration_setup_e2e(hass: HomeAssistant, mock_config_entry):
     www_dir.mkdir(parents=True, exist_ok=True)
 
     # Create a dummy frontend card file
-    card_file = www_dir / "switch-for-time-card.js"
+    card_file = www_dir / "toggle-timer-card.js"
     card_file.write_text("// Test card file")
 
     try:

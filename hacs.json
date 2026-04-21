@@ -1,5 +1,5 @@
 {
-  "name": "Switch For Time",
+  "name": "Toggle Timer",
   "render_readme": true,
   "homeassistant": "2024.1.0"
 }

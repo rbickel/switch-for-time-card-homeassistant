@@ -2,13 +2,13 @@
   "config": {
     "step": {
       "user": {
-        "title": "Switch For Time",
+        "title": "Toggle Timer",
         "description": "Set up the backend services and timer state entity.",
         "data": {}
       }
     },
     "abort": {
-      "single_instance_allowed": "Only one Switch For Time integration can be configured."
+      "single_instance_allowed": "Only one Toggle Timer integration can be configured."
     }
   }
 }

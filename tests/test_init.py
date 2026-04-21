@@ -1,4 +1,4 @@
-"""Tests for Switch For Time integration setup."""
+"""Tests for Toggle Timer integration setup."""
 from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from homeassistant.core import HomeAssistant
@@ -6,12 +6,12 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.exceptions import HomeAssistantError
 
-from custom_components.switch_for_time import (
+from custom_components.toggle_timer import (
     async_setup,
     async_setup_entry,
     async_unload_entry,
 )
-from custom_components.switch_for_time.const import DOMAIN, SERVICE_START, SERVICE_CANCEL
+from custom_components.toggle_timer.const import DOMAIN, SERVICE_START, SERVICE_CANCEL
 
 
 @pytest.mark.asyncio
@@ -30,7 +30,7 @@ async def test_async_setup_entry_registers_static_paths(
     hass.http.async_register_static_paths = AsyncMock()
 
     # Mock the manager
-    with patch("custom_components.switch_for_time.SwitchForTimeManager") as mock_manager_class:
+    with patch("custom_components.toggle_timer.ToggleTimerManager") as mock_manager_class:
         mock_manager = MagicMock()
         mock_manager.async_initialize = AsyncMock()
         mock_manager_class.return_value = mock_manager
@@ -57,8 +57,8 @@ async def test_async_setup_entry_registers_static_paths(
 
         static_config = call_args[0]
         assert isinstance(static_config, StaticPathConfig)
-        assert static_config.url_path == "/hacsfiles/switch_for_time/switch-for-time-card.js"
-        assert "switch-for-time-card.js" in static_config.path
+        assert static_config.url_path == "/hacsfiles/toggle_timer/toggle-timer-card.js"
+        assert "toggle-timer-card.js" in static_config.path
         assert static_config.cache_headers is True
 
 
@@ -72,7 +72,7 @@ async def test_async_setup_entry_initializes_manager(
     hass.http.async_register_static_paths = AsyncMock()
 
     # Mock the manager
-    with patch("custom_components.switch_for_time.SwitchForTimeManager") as mock_manager_class:
+    with patch("custom_components.toggle_timer.ToggleTimerManager") as mock_manager_class:
         mock_manager = MagicMock()
         mock_manager.async_initialize = AsyncMock()
         mock_manager_class.return_value = mock_manager
@@ -106,7 +106,7 @@ async def test_async_setup_entry_registers_services(
     hass.http.async_register_static_paths = AsyncMock()
 
     # Mock the manager
-    with patch("custom_components.switch_for_time.SwitchForTimeManager") as mock_manager_class:
+    with patch("custom_components.toggle_timer.ToggleTimerManager") as mock_manager_class:
         mock_manager = MagicMock()
         mock_manager.async_initialize = AsyncMock()
         mock_manager_class.return_value = mock_manager
@@ -135,7 +135,7 @@ async def test_async_setup_entry_forwards_platforms(
     hass.http.async_register_static_paths = AsyncMock()
 
     # Mock the manager
-    with patch("custom_components.switch_for_time.SwitchForTimeManager") as mock_manager_class:
+    with patch("custom_components.toggle_timer.ToggleTimerManager") as mock_manager_class:
         mock_manager = MagicMock()
         mock_manager.async_initialize = AsyncMock()
         mock_manager_class.return_value = mock_manager
@@ -162,7 +162,7 @@ async def test_async_unload_entry(hass: HomeAssistant, mock_config_entry: Config
     hass.http = MagicMock()
     hass.http.async_register_static_paths = AsyncMock()
 
-    with patch("custom_components.switch_for_time.SwitchForTimeManager") as mock_manager_class:
+    with patch("custom_components.toggle_timer.ToggleTimerManager") as mock_manager_class:
         mock_manager = MagicMock()
         mock_manager.async_initialize = AsyncMock()
         mock_manager.async_shutdown = AsyncMock()
@@ -199,7 +199,7 @@ async def test_services_call_manager(hass: HomeAssistant, mock_config_entry: Con
     hass.http = MagicMock()
     hass.http.async_register_static_paths = AsyncMock()
 
-    with patch("custom_components.switch_for_time.SwitchForTimeManager") as mock_manager_class:
+    with patch("custom_components.toggle_timer.ToggleTimerManager") as mock_manager_class:
         mock_manager = MagicMock()
         mock_manager.async_initialize = AsyncMock()
         mock_manager.async_start_timer = AsyncMock()
@@ -251,7 +251,7 @@ async def test_services_call_manager(hass: HomeAssistant, mock_config_entry: Con
 @pytest.mark.asyncio
 async def test_service_fails_when_integration_not_loaded(hass: HomeAssistant):
     """Test that services fail gracefully when integration is not loaded."""
-    from custom_components.switch_for_time import _get_manager
+    from custom_components.toggle_timer import _get_manager
 
-    with pytest.raises(HomeAssistantError, match="Switch For Time integration is not loaded"):
+    with pytest.raises(HomeAssistantError, match="Toggle Timer integration is not loaded"):
         _get_manager(hass)

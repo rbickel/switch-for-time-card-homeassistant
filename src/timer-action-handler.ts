@@ -39,20 +39,20 @@ declare global {
 }
 
 console.info(
-  '%c SWITCH-FOR-TIME-ACTION %c Registering global timer action handler ',
+  '%c TOGGLE-TIMER-ACTION %c Registering global timer action handler ',
   'color: white; background: #0288d1; font-weight: bold;',
   'color: #0288d1; background: white; font-weight: bold;'
 );
 
-@customElement('switch-for-time-action-handler')
-export class SwitchForTimeActionHandler extends LitElement {
+@customElement('toggle-timer-action-handler')
+export class ToggleTimerActionHandler extends LitElement {
   @state() private _hass?: HomeAssistant;
   @state() private _config?: TimerPopupConfig;
   private _registered = false;
 
   private readonly _handleTimerActionEvent = (event: Event): void => {
     console.info(
-      'Switch For Time: Received event',
+      'Toggle Timer: Received event',
       event.type,
       'with detail:',
       (event as CustomEvent).detail
@@ -61,7 +61,7 @@ export class SwitchForTimeActionHandler extends LitElement {
     const actionRequest = this._extractActionRequest(event);
     if (!actionRequest) {
       console.warn(
-        'Switch For Time: Failed to extract action request from event',
+        'Toggle Timer: Failed to extract action request from event',
         event.type
       );
       return;
@@ -70,7 +70,7 @@ export class SwitchForTimeActionHandler extends LitElement {
     const { config } = actionRequest;
     if (!config) {
       console.warn(
-        'switch-for-time-action: missing "config" in event detail'
+        'toggle-timer-action: missing "config" in event detail'
       );
       return;
     }
@@ -79,13 +79,13 @@ export class SwitchForTimeActionHandler extends LitElement {
       actionRequest.hass || this._resolveHass(event);
     if (!hass) {
       console.warn(
-        'switch-for-time-action: unable to resolve Home Assistant instance'
+        'toggle-timer-action: unable to resolve Home Assistant instance'
       );
       return;
     }
 
     console.info(
-      'Switch For Time: Opening popup for entity',
+      'Toggle Timer: Opening popup for entity',
       config.entity
     );
     void window.switchForTimeAction?.(hass, config);
@@ -99,13 +99,13 @@ export class SwitchForTimeActionHandler extends LitElement {
   disconnectedCallback(): void {
     super.disconnectedCallback();
     window.removeEventListener(
-      'switch-for-time-action',
+      'toggle-timer-action',
       this._handleTimerActionEvent,
       true
     );
     window.removeEventListener('ll-custom', this._handleTimerActionEvent, true);
     document.removeEventListener(
-      'switch-for-time-action',
+      'toggle-timer-action',
       this._handleTimerActionEvent,
       true
     );
@@ -129,7 +129,7 @@ export class SwitchForTimeActionHandler extends LitElement {
       this.requestUpdate();
       await this.updateComplete;
 
-      const popup = this.shadowRoot?.querySelector('switch-for-time-popup') as any;
+      const popup = this.shadowRoot?.querySelector('toggle-timer-popup') as any;
       if (popup) {
         popup.open();
       }
@@ -138,20 +138,20 @@ export class SwitchForTimeActionHandler extends LitElement {
     // Listen for fire-dom-event from cards
     // Use capture phase to catch events before they might be stopped
     window.addEventListener(
-      'switch-for-time-action',
+      'toggle-timer-action',
       this._handleTimerActionEvent,
       true
     );
     window.addEventListener('ll-custom', this._handleTimerActionEvent, true);
     // Also listen on document for events that might not reach window
     document.addEventListener(
-      'switch-for-time-action',
+      'toggle-timer-action',
       this._handleTimerActionEvent,
       true
     );
     document.addEventListener('ll-custom', this._handleTimerActionEvent, true);
 
-    console.info('Switch For Time: Global timer action handler registered');
+    console.info('Toggle Timer: Global timer action handler registered');
   }
 
   private _extractActionRequest(
@@ -159,7 +159,7 @@ export class SwitchForTimeActionHandler extends LitElement {
   ): TimerActionRequest | undefined {
     const detail = (event as CustomEvent<TimerActionRequestDetail | LovelaceCustomEventDetail>).detail;
 
-    if (event.type === 'switch-for-time-action') {
+    if (event.type === 'toggle-timer-action') {
       return this._normalizeActionRequest(
         this._isLovelaceCustomEventDetail(detail) ? undefined : detail
       );
@@ -174,9 +174,9 @@ export class SwitchForTimeActionHandler extends LitElement {
     }
 
     const fireDomEventDetail =
-      detail?.fire_dom_event?.event === 'switch-for-time-action'
+      detail?.fire_dom_event?.event === 'toggle-timer-action'
         ? detail.fire_dom_event.detail
-        : detail?.event === 'switch-for-time-action'
+        : detail?.event === 'toggle-timer-action'
           ? detail.detail
           : undefined;
 
@@ -279,43 +279,43 @@ export class SwitchForTimeActionHandler extends LitElement {
     }
 
     return html`
-      <switch-for-time-popup
+      <toggle-timer-popup
         .hass=${this._hass}
         .config=${this._config}
-      ></switch-for-time-popup>
+      ></toggle-timer-popup>
     `;
   }
 }
 
 // Auto-register the handler on load
 function autoRegisterHandler() {
-  if (!document.querySelector('switch-for-time-action-handler')) {
-    console.info('Switch For Time: Creating action handler element');
-    const handler = document.createElement('switch-for-time-action-handler');
+  if (!document.querySelector('toggle-timer-action-handler')) {
+    console.info('Toggle Timer: Creating action handler element');
+    const handler = document.createElement('toggle-timer-action-handler');
     document.body.appendChild(handler);
-    console.info('Switch For Time: Action handler element added to DOM');
+    console.info('Toggle Timer: Action handler element added to DOM');
   } else {
-    console.info('Switch For Time: Action handler already exists in DOM');
+    console.info('Toggle Timer: Action handler already exists in DOM');
   }
 }
 
 // Try immediate registration
 if (document.body) {
-  customElements.whenDefined('switch-for-time-action-handler').then(autoRegisterHandler);
+  customElements.whenDefined('toggle-timer-action-handler').then(autoRegisterHandler);
 } else {
   // If body not ready, wait for DOMContentLoaded
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-      customElements.whenDefined('switch-for-time-action-handler').then(autoRegisterHandler);
+      customElements.whenDefined('toggle-timer-action-handler').then(autoRegisterHandler);
     });
   } else {
     // DOM already loaded
-    customElements.whenDefined('switch-for-time-action-handler').then(autoRegisterHandler);
+    customElements.whenDefined('toggle-timer-action-handler').then(autoRegisterHandler);
   }
 }
 
 // Additional fallback: register when custom element is first defined
-customElements.whenDefined('switch-for-time-action-handler').then(() => {
+customElements.whenDefined('toggle-timer-action-handler').then(() => {
   // Give a small delay to ensure DOM is ready
   setTimeout(autoRegisterHandler, 100);
 });

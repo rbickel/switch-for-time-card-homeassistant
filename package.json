@@ -1,9 +1,9 @@
 {
-  "name": "switch-for-time-card",
+  "name": "toggle-timer-card",
   "version": "1.2.16",
   "description": "Home Assistant custom card for timed entity switching",
   "type": "module",
-  "main": "dist/switch-for-time-card.js",
+  "main": "dist/toggle-timer-card.js",
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c --watch",

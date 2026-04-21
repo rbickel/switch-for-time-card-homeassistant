@@ -1,4 +1,4 @@
-// Type definitions for Switch For Time Card
+// Type definitions for Toggle Timer Card
 
 /**
  * Shared timer configuration fields used by both the card config and the
@@ -20,7 +20,7 @@ export interface TimerConfigBase {
   };
 }
 
-export interface SwitchForTimeCardConfig extends TimerConfigBase {
+export interface ToggleTimerCardConfig extends TimerConfigBase {
   type: string;
   show_remaining?: boolean;
   tap_behavior?: 'popup' | 'immediate';
@@ -85,13 +85,13 @@ export interface HassEntity {
 
 export interface LovelaceCard extends HTMLElement {
   hass?: HomeAssistant;
-  setConfig(config: SwitchForTimeCardConfig): void;
+  setConfig(config: ToggleTimerCardConfig): void;
   getCardSize?(): number;
 }
 
 export interface LovelaceCardEditor extends HTMLElement {
   hass?: HomeAssistant;
-  setConfig(config: SwitchForTimeCardConfig): void;
+  setConfig(config: ToggleTimerCardConfig): void;
 }
 
 export const SUPPORTED_DOMAINS = [
