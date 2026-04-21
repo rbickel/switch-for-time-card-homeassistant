@@ -57,8 +57,8 @@ async def test_async_setup_entry_registers_static_paths(
 
         static_config = call_args[0]
         assert isinstance(static_config, StaticPathConfig)
-        assert static_config.url_path == "/hacsfiles/switch_for_time/switch-for-time-card.js"
-        assert "switch-for-time-card.js" in static_config.path
+        assert static_config.url_path == "/hacsfiles/switch_for_time/toggle-timer-card.js"
+        assert "toggle-timer-card.js" in static_config.path
         assert static_config.cache_headers is True
 
 

@@ -16,7 +16,7 @@ const TRANSLATIONS: Record<string, any> = {
 
 export type TimerPopupConfig = TimerConfigBase;
 
-@customElement('switch-for-time-popup')
+@customElement('toggle-timer-popup')
 export class SwitchForTimePopup extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @property({ type: Object }) public config!: TimerPopupConfig;

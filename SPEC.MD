@@ -1,4 +1,4 @@
-# switch-for-time
+# toggle-timer
 
 A Home Assistant custom Lovelace card + companion script package that lets the user tap any entity, pick a duration from quick-buttons in a popup, and toggle that entity (on / off / toggle) for the chosen duration before reverting it automatically.
 
@@ -24,16 +24,16 @@ A Home Assistant custom Lovelace card + companion script package that lets the u
 ## 2. Repository layout
 
 ```
-switch-for-time/
+toggle-timer/
 ├── README.md
 ├── SPEC.md                          # this file
 ├── hacs.json                        # HACS metadata (frontend + integration)
 ├── info.md                          # HACS info card
 ├── LICENSE
 ├── dist/
-│   └── switch-for-time-card.js      # built custom card (HACS frontend artifact)
+│   └── toggle-timer-card.js      # built custom card (HACS frontend artifact)
 ├── src/
-│   ├── switch-for-time-card.ts      # custom card source (Lit + TS)
+│   ├── toggle-timer-card.ts      # custom card source (Lit + TS)
 │   ├── editor.ts                    # GUI editor for the card
 │   ├── types.ts                     # shared type defs
 │   └── localize/
@@ -48,7 +48,7 @@ switch-for-time/
         └── README.md                # install instructions for the backend
 ```
 
-The `dist/switch-for-time-card.js` file is what HACS installs as a Lovelace resource. The `packages/switch_for_time/package.yaml` is what the user includes via `homeassistant.packages` in their `configuration.yaml`.
+The `dist/toggle-timer-card.js` file is what HACS installs as a Lovelace resource. The `packages/switch_for_time/package.yaml` is what the user includes via `homeassistant.packages` in their `configuration.yaml`.
 
 ---
 
@@ -180,14 +180,14 @@ The card validates the configured `entity` against this list and shows a config 
 
 ### 5.1 Card identity
 
-- Custom element name: `switch-for-time-card`
+- Custom element name: `toggle-timer-card`
 - HACS category: `plugin`
 - Registered in `customCards` window registry with name "Switch For Time" and description "Tap an entity, pick a duration, auto-revert."
 
 ### 5.2 Card YAML config schema
 
 ```yaml
-type: custom:switch-for-time-card
+type: custom:toggle-timer-card
 entity: switch.living_room_lamp        # required
 action: toggle                          # on | off | toggle  (default: toggle)
 revert_to: previous                     # previous | on | off | none (default: previous)
@@ -278,7 +278,7 @@ A v1 release is considered complete when **all** of the following hold:
 4. If HA is restarted mid-timer, the timer resumes with the correct remaining duration on next start.
 5. If the timer's `ends_at` passed during downtime, the entity is reverted on next start.
 6. Re-tapping a card with an active timer offers cancel/replace/extend, and each works as specified.
-7. Up to 8 concurrent timers across different entities work correctly. Attempting a 9th surfaces a non-fatal notification: "All switch-for-time slots are in use."
+7. Up to 8 concurrent timers across different entities work correctly. Attempting a 9th surfaces a non-fatal notification: "All toggle-timer slots are in use."
 8. The GUI editor produces valid YAML and rejects invalid `durations` / `entity` values inline.
 9. Card renders correctly in light, dark, and a custom community theme without hard-coded colors.
 10. The package YAML passes `hassfest` and `ha core check` linting; the card source passes `eslint` + `tsc --noEmit`.

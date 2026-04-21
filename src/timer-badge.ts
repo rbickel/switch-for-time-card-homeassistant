@@ -2,7 +2,7 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { HomeAssistant, TimerState, TimerStateMap } from './types';
 
-@customElement('switch-for-time-badge')
+@customElement('toggle-timer-badge')
 export class SwitchForTimeBadge extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @property({ type: String }) public entity!: string;

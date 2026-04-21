@@ -43,35 +43,35 @@ This repository provides both the frontend Lovelace card and the backend Home As
 2. Go to "Integrations"
 3. Click the menu (⋮) in the top right
 4. Select "Custom repositories"
-5. Add this repository URL: `https://github.com/rbickel/switch-for-time-card-homeassistant`
+5. Add this repository URL: `https://github.com/rbickel/toggle-timer-homeassistant`
 6. Select category: "Integration"
 7. Click "Add"
 8. Find "Switch For Time" in the integrations list and click "Download"
 9. Restart Home Assistant
 10. **IMPORTANT:** Go to **Settings → Devices & Services → Add Integration** and search for "Switch For Time"
 11. **IMPORTANT:** Add the **Switch For Time** integration via the UI - this step is required for the card to work!
-12. **Frontend JavaScript registration:** After step 11, the integration auto-registers the card at `/hacsfiles/switch_for_time/switch-for-time-card.js`. No manual Lovelace resource is needed. If you want to double-check, open **Settings → Dashboards → Resources** and confirm a `module` resource exists with that URL (add it if it is missing).
+12. **Frontend JavaScript registration:** After step 11, the integration auto-registers the card at `/hacsfiles/switch_for_time/toggle-timer-card.js`. No manual Lovelace resource is needed. If you want to double-check, open **Settings → Dashboards → Resources** and confirm a `module` resource exists with that URL (add it if it is missing).
 
 **⚠️ Critical:** The Lovelace card will **only** be loaded after you configure the integration in step 10-11. Simply downloading via HACS is not enough - you **must** add the integration via **Settings → Devices & Services**. The Lovelace card is automatically registered when you configure the integration. You do **not** need to add this repository separately as a Frontend/Lovelace repository.
 
 After installation, you can add the card to your Lovelace dashboard. The card is available at:
 ```
-/hacsfiles/switch_for_time/switch-for-time-card.js
+/hacsfiles/switch_for_time/toggle-timer-card.js
 ```
 
 This provides:
 - **Backend**: The `switch_for_time.start` and `switch_for_time.cancel` services and `sensor.switch_for_time_state`
-- **Frontend**: The `custom:switch-for-time-card` Lovelace card
+- **Frontend**: The `custom:toggle-timer-card` Lovelace card
 
 ### Manual Installation
 
 #### Integration (Recommended)
 
-1. Download the latest release from [GitHub releases](https://github.com/rbickel/switch-for-time-card-homeassistant/releases)
+1. Download the latest release from [GitHub releases](https://github.com/rbickel/toggle-timer-homeassistant/releases)
 2. Extract the `custom_components/switch_for_time` folder to your Home Assistant `custom_components` directory
 3. Restart Home Assistant
 4. Go to **Settings → Devices & Services → Add Integration** and add **Switch For Time**
-5. **Frontend JavaScript registration:** The integration will register `/hacsfiles/switch_for_time/switch-for-time-card.js` for you after step 4. Verify under **Settings → Dashboards → Resources** that a `module` resource with that URL exists (add it manually if it's missing).
+5. **Frontend JavaScript registration:** The integration will register `/hacsfiles/switch_for_time/toggle-timer-card.js` for you after step 4. Verify under **Settings → Dashboards → Resources** that a `module` resource with that URL exists (add it manually if it's missing).
 
 The integration includes the frontend card in its `www` directory and will automatically register it.
 
@@ -79,12 +79,12 @@ The integration includes the frontend card in its `www` directory and will autom
 
 If you want to install just the frontend card manually:
 
-1. Download `dist/switch-for-time-card.js` from the [latest release](https://github.com/rbickel/switch-for-time-card-homeassistant/releases)
-2. Copy it to `<config>/www/switch-for-time-card.js`
+1. Download `dist/toggle-timer-card.js` from the [latest release](https://github.com/rbickel/toggle-timer-homeassistant/releases)
+2. Copy it to `<config>/www/toggle-timer-card.js`
 3. Add to your Lovelace resources:
    ```yaml
    resources:
-     - url: /local/switch-for-time-card.js
+     - url: /local/toggle-timer-card.js
        type: module
    ```
 4. Restart Home Assistant
@@ -124,7 +124,7 @@ vertical: false
 tap_action:
   action: fire-dom-event
   fire_dom_event:
-    event: switch-for-time-action
+    event: toggle-timer-action
     detail:
       config:
         entity: switch.shelly_plug_skimmer
@@ -142,7 +142,7 @@ card:
   tap_action:
     action: fire-dom-event
     fire_dom_event:
-      event: switch-for-time-action
+      event: toggle-timer-action
       detail:
         config:
           entity: switch.bathroom_fan
@@ -155,7 +155,7 @@ card_mod:
       position: relative;
     }
 elements:
-  - type: custom:switch-for-time-badge
+  - type: custom:toggle-timer-badge
     entity: switch.bathroom_fan
 ```
 
@@ -164,7 +164,7 @@ See [EXAMPLES.md](EXAMPLES.md) for more examples with different card types!
 ### Basic Example (Custom Card)
 
 ```yaml
-type: custom:switch-for-time-card
+type: custom:toggle-timer-card
 entity: switch.bathroom_fan
 action: on
 revert_to: previous
@@ -174,7 +174,7 @@ durations: [5, 10, 15, 30]
 ### Advanced Example
 
 ```yaml
-type: custom:switch-for-time-card
+type: custom:toggle-timer-card
 entity: light.living_room
 action: toggle
 revert_to: previous
@@ -195,7 +195,7 @@ theme:
 
 | Name | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
-| `type` | string | yes | - | Must be `custom:switch-for-time-card` |
+| `type` | string | yes | - | Must be `custom:toggle-timer-card` |
 | `entity` | string | yes | - | Entity ID to control |
 | `action` | string | no | `toggle` | Action to perform: `on`, `off`, or `toggle` |
 | `revert_to` | string | no | `previous` | State to revert to: `previous`, `on`, `off`, or `none` |
@@ -309,7 +309,7 @@ Set `tap_behavior: immediate` to skip the popup and use the first duration insta
 
 ## 🐛 Troubleshooting
 
-### "Custom element not found: switch-for-time-card" Error
+### "Custom element not found: toggle-timer-card" Error
 
 This error means the Lovelace card hasn't been loaded by Home Assistant. This typically happens when:
 
@@ -330,13 +330,13 @@ This error means the Lovelace card hasn't been loaded by Home Assistant. This ty
 
 4. **Manual Installation Issue**
    - If you installed manually, verify:
-     - `custom_components/switch_for_time/www/switch-for-time-card.js` exists
+     - `custom_components/switch_for_time/www/toggle-timer-card.js` exists
      - The integration is added via **Settings → Devices & Services**
      - Home Assistant was restarted after installation
 
 ### Card not showing up
 - Clear browser cache (Ctrl+Shift+R or Cmd+Shift+R)
-- Check that `custom_components/switch_for_time/www/switch-for-time-card.js` exists
+- Check that `custom_components/switch_for_time/www/toggle-timer-card.js` exists
 - Verify the integration is configured in **Settings → Devices & Services**
 - Check browser console for JavaScript errors (F12 → Console tab)
 
@@ -361,7 +361,7 @@ This error means the Lovelace card hasn't been loaded by Home Assistant. This ty
 - Check Home Assistant logs: **Settings → System → Logs**
 - Check browser console: Press F12 → Console tab
 - Verify entity domain is supported (switch, light, input_boolean, fan, siren, humidifier, media_player)
-- Create an issue on [GitHub](https://github.com/rbickel/switch-for-time-card-homeassistant/issues) with:
+- Create an issue on [GitHub](https://github.com/rbickel/toggle-timer-homeassistant/issues) with:
   - Home Assistant version
   - Installation method (HACS/Manual)
   - Browser and version
@@ -382,16 +382,16 @@ npm run build
 npm run watch
 ```
 
-The built file will be in `dist/switch-for-time-card.js`.
+The built file will be in `dist/toggle-timer-card.js`.
 
 ### Project Structure
 
 ```
-switch-for-time-card/
+toggle-timer-card/
 ├── custom_components/
 │   └── switch_for_time/            # Optional backend integration (no YAML package setup)
 ├── src/
-│   ├── switch-for-time-card.ts    # Main card component
+│   ├── toggle-timer-card.ts    # Main card component
 │   ├── editor.ts                   # Visual editor
 │   ├── types.ts                    # TypeScript types
 │   └── localize/
@@ -401,7 +401,7 @@ switch-for-time-card/
 │   └── switch_for_time/
 │       └── package.yaml            # Backend HA package
 ├── dist/
-│   └── switch-for-time-card.js     # Built card
+│   └── toggle-timer-card.js     # Built card
 ├── package.json
 ├── tsconfig.json
 ├── rollup.config.js

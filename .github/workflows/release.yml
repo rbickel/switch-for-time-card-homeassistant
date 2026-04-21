@@ -108,8 +108,8 @@ jobs:
             package-lock.json \
             package.json \
             src/types.ts \
-            dist/switch-for-time-card.js \
-            custom_components/switch_for_time/www/switch-for-time-card.js
+            dist/toggle-timer-card.js \
+            custom_components/switch_for_time/www/toggle-timer-card.js
           if git diff --cached --quiet; then
             echo "No release changes to commit"
             echo "released=false" >> "$GITHUB_OUTPUT"

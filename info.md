@@ -31,7 +31,7 @@ This repository includes both:
 ## Example
 
 ```yaml
-type: custom:switch-for-time-card
+type: custom:toggle-timer-card
 entity: switch.living_room_lamp
 action: toggle
 revert_to: previous
@@ -45,7 +45,7 @@ allow_custom_duration: true
 
 | Name | Type | Required | Default | Description |
 |------|------|----------|---------|-------------|
-| `type` | string | yes | - | Must be `custom:switch-for-time-card` |
+| `type` | string | yes | - | Must be `custom:toggle-timer-card` |
 | `entity` | string | yes | - | Entity ID to control |
 | `action` | string | no | `toggle` | Action: `on`, `off`, or `toggle` |
 | `revert_to` | string | no | `previous` | Revert to: `previous`, `on`, `off`, or `none` |

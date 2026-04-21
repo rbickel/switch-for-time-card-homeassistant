@@ -47,7 +47,7 @@ def get_card_url(hass: HomeAssistant) -> str:
     except Exception:
         version = "unknown"
 
-    return f"/hacsfiles/{DOMAIN}/switch-for-time-card.js?v={version}"
+    return f"/hacsfiles/{DOMAIN}/toggle-timer-card.js?v={version}"
 
 START_SCHEMA = vol.Schema(
     {
@@ -78,14 +78,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Get the card URL with version query parameter for cache-busting
     card_url = get_card_url(hass)
     # Register the static path without version parameter
-    base_card_url = f"/hacsfiles/{DOMAIN}/switch-for-time-card.js"
+    base_card_url = f"/hacsfiles/{DOMAIN}/toggle-timer-card.js"
 
     # Register the frontend card
     await hass.http.async_register_static_paths(
         [
             StaticPathConfig(
                 url_path=base_card_url,
-                path=hass.config.path(f"custom_components/{DOMAIN}/www/switch-for-time-card.js"),
+                path=hass.config.path(f"custom_components/{DOMAIN}/www/toggle-timer-card.js"),
                 cache_headers=True,
             )
         ]

@@ -21,12 +21,12 @@ const TRANSLATIONS: Record<string, any> = {
 };
 
 console.info(
-  `%c SWITCH-FOR-TIME-CARD %c ${CARD_VERSION} `,
+  `%c TOGGLE-TIMER-CARD %c ${CARD_VERSION} `,
   'color: white; background: #0288d1; font-weight: bold;',
   'color: #0288d1; background: white; font-weight: bold;'
 );
 
-@customElement('switch-for-time-card')
+@customElement('toggle-timer-card')
 export class SwitchForTimeCard extends LitElement implements LovelaceCard {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private _config!: SwitchForTimeCardConfig;
@@ -43,12 +43,12 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
   private _selectionMode: 'start' | 'replace' | 'extend' = 'start';
 
   public static async getConfigElement() {
-    return document.createElement('switch-for-time-card-editor');
+    return document.createElement('toggle-timer-card-editor');
   }
 
   public static getStubConfig() {
     return {
-      type: 'custom:switch-for-time-card',
+      type: 'custom:toggle-timer-card',
       entity: '',
       action: 'toggle',
       revert_to: 'previous',
@@ -764,7 +764,7 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
 // Register the card
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-  type: 'switch-for-time-card',
+  type: 'toggle-timer-card',
   name: 'Switch For Time',
   description: 'Tap an entity, pick a duration, auto-revert.',
 });
