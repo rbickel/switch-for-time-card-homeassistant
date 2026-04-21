@@ -45,3 +45,28 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+  hassfest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run hassfest
+        # 1.0.0 fails with ModuleNotFoundError for script.hassfest; pin a known-good
+        # current commit until Home Assistant publishes a newer working tag.
+        uses: home-assistant/actions/hassfest@f6f29a7ee3fa0eccadf3620a7b9ee00ab54ec03b
+
+  hacs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run HACS validation
+        uses: hacs/action@22.5.0
+        with:
+          category: integration
+          ignore: brands description topics

@@ -27,7 +27,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-      - name: Bump version in manifest and HACS metadata
+      - name: Bump version in manifest and package metadata
         id: bump
         run: |
           python - <<'PY'
@@ -37,7 +37,6 @@ jobs:
           from pathlib import Path
 
           manifest_path = Path("custom_components/switch_for_time/manifest.json")
-          hacs_path = Path("hacs.json")
           package_path = Path("package.json")
           types_path = Path("src/types.ts")
 
@@ -55,8 +54,6 @@ jobs:
           new_version = f"{major}.{minor}.{int(patch) + 1}"
 
           manifest["version"] = new_version
-          hacs = json.loads(hacs_path.read_text())
-          hacs["version"] = new_version
           package = json.loads(package_path.read_text())
           package["version"] = new_version
           types = types_path.read_text()
@@ -68,7 +65,6 @@ jobs:
           )
 
           manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
-          hacs_path.write_text(json.dumps(hacs, indent=2) + "\n")
           package_path.write_text(json.dumps(package, indent=2) + "\n")
           types_path.write_text(types)
 
@@ -91,6 +87,17 @@ jobs:
       - name: Rebuild frontend assets
         run: npm run build
 
+      - name: Run hassfest
+        # 1.0.0 fails with ModuleNotFoundError for script.hassfest; pin a known-good
+        # current commit until Home Assistant publishes a newer working tag.
+        uses: home-assistant/actions/hassfest@f6f29a7ee3fa0eccadf3620a7b9ee00ab54ec03b
+
+      - name: Run HACS validation
+        uses: hacs/action@22.5.0
+        with:
+          category: integration
+          ignore: brands description topics
+
       - name: Commit and tag release
         id: release_commit
         env:
@@ -98,7 +105,6 @@ jobs:
         run: |
           git add \
             custom_components/switch_for_time/manifest.json \
-            hacs.json \
             package-lock.json \
             package.json \
             src/types.ts \

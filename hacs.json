@@ -1,6 +1,5 @@
 {
   "name": "Switch For Time",
   "render_readme": true,
-  "homeassistant": "2024.1.0",
-  "version": "1.2.15"
+  "homeassistant": "2024.1.0"
 }
