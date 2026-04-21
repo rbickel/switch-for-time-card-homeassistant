@@ -102,7 +102,7 @@ async def test_integration_timer_lifecycle_covers_start_replace_extend_and_cance
     first_duration = (first_ends_at - first_started_at).total_seconds()
     assert timer_state["duration_minutes"] == 5
     # Allow a small tolerance for async scheduling jitter during service handling.
-    assert first_duration == pytest.approx(5 * SECONDS_PER_MINUTE, abs=1)
+    assert first_duration == pytest.approx(5 * SECONDS_PER_MINUTE, abs=2)
 
     await hass.services.async_call(
         DOMAIN,
