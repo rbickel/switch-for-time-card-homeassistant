@@ -1,7 +1,8 @@
 """End-to-end integration tests for Toggle Timer."""
-from datetime import UTC, datetime
+from datetime import datetime
 import json
 from pathlib import Path
+import shutil
 
 import pytest
 from homeassistant.components.frontend import DATA_EXTRA_MODULE_URL
@@ -10,11 +11,22 @@ from homeassistant.setup import async_setup_component
 
 from custom_components.toggle_timer.const import DOMAIN, SERVICE_CANCEL, SERVICE_START
 
+SECONDS_PER_MINUTE = 60
+HACS_FILES_PATH = "/hacsfiles"
+
+
+@pytest.fixture(autouse=True)
+def cleanup_test_custom_component_files(hass: HomeAssistant):
+    """Ensure temporary custom component files are removed after each test."""
+    yield
+    integration_dir = Path(hass.config.path(f"custom_components/{DOMAIN}"))
+    shutil.rmtree(integration_dir, ignore_errors=True)
+
 
 async def _setup_full_integration(
     hass: HomeAssistant, mock_config_entry, manifest_version: str = "9.9.9"
 ) -> str:
-    """Set up Home Assistant components and the Toggle Timer config entry."""
+    """Set up Home Assistant components and return the versioned card resource URL."""
     assert await async_setup_component(hass, "http", {"http": {}})
     assert await async_setup_component(
         hass,
@@ -40,7 +52,7 @@ async def _setup_full_integration(
     assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
     await hass.async_block_till_done()
 
-    return f"/hacsfiles/{DOMAIN}/toggle-timer-card.js?v={manifest_version}"
+    return f"{HACS_FILES_PATH}/{DOMAIN}/toggle-timer-card.js?v={manifest_version}"
 
 
 @pytest.mark.asyncio
@@ -85,10 +97,12 @@ async def test_integration_timer_lifecycle_covers_start_replace_extend_and_cance
     assert sensor_state is not None
     state_data = json.loads(sensor_state.state)
     timer_state = state_data[entity_id]
+    first_started_at = datetime.fromisoformat(timer_state["started_at"])
     first_ends_at = datetime.fromisoformat(timer_state["ends_at"])
-    first_remaining = (first_ends_at - datetime.now(UTC)).total_seconds()
+    first_duration = (first_ends_at - first_started_at).total_seconds()
     assert timer_state["duration_minutes"] == 5
-    assert first_remaining > 0
+    # Allow a small tolerance for async scheduling jitter during service handling.
+    assert first_duration == pytest.approx(5 * SECONDS_PER_MINUTE, abs=1)
 
     await hass.services.async_call(
         DOMAIN,
