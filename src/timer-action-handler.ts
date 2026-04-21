@@ -169,9 +169,19 @@ export class ToggleTimerActionHandler extends LitElement {
     const detail = (event as CustomEvent<TimerActionRequestDetail | LovelaceCustomEventDetail>).detail;
 
     if (event.type === 'toggle-timer-action') {
-      return this._normalizeActionRequest(
+      const directRequest = this._normalizeActionRequest(
         this._isLovelaceCustomEventDetail(detail) ? undefined : detail
       );
+      if (directRequest.config) {
+        return directRequest;
+      }
+
+      if (this._isLovelaceCustomEventDetail(detail)) {
+        const wrappedDetail = this._extractWrappedDetail(detail, event.type);
+        return this._normalizeActionRequest(wrappedDetail);
+      }
+
+      return directRequest;
     }
 
     if (event.type !== 'll-custom') {
@@ -182,18 +192,38 @@ export class ToggleTimerActionHandler extends LitElement {
       return undefined;
     }
 
-    const fireDomEventDetail =
-      detail?.fire_dom_event?.event === 'toggle-timer-action'
-        ? detail.fire_dom_event.detail
-        : detail?.event === 'toggle-timer-action'
-          ? detail.detail
-          : undefined;
+    const wrappedDetail = this._extractWrappedDetail(detail, event.type);
+    return this._normalizeActionRequest(wrappedDetail);
+  }
 
-    if (!fireDomEventDetail) {
-      return undefined;
+  private _extractWrappedDetail(
+    detail: LovelaceCustomEventDetail,
+    eventType: string
+  ): TimerActionRequestDetail {
+    const fireDomEvent = detail?.fire_dom_event;
+    if (fireDomEvent?.event === 'toggle-timer-action') {
+      return fireDomEvent.detail;
     }
 
-    return this._normalizeActionRequest(fireDomEventDetail);
+    if (detail?.event === 'toggle-timer-action') {
+      return detail.detail;
+    }
+
+    // Companion app/event bridge variants can dispatch toggle-timer-action
+    // with wrapped detail but without repeating the event name inside detail.
+    if (eventType === 'toggle-timer-action') {
+      if (fireDomEvent?.detail !== undefined) {
+        return fireDomEvent.detail;
+      }
+      if (detail?.detail !== undefined) {
+        return detail.detail;
+      }
+      if (fireDomEvent && typeof fireDomEvent === 'object') {
+        return fireDomEvent as TimerActionRequestDetail;
+      }
+    }
+
+    return undefined;
   }
 
   private _isLovelaceCustomEventDetail(
