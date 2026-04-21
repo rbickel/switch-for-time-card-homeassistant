@@ -5,15 +5,15 @@ import terser from '@rollup/plugin-terser';
 import json from '@rollup/plugin-json';
 
 export default {
-  input: 'src/switch-for-time-card.ts',
+  input: 'src/toggle-timer-card.ts',
   output: [
     {
-      file: 'dist/switch-for-time-card.js',
+      file: 'dist/toggle-timer-card.js',
       format: 'es',
       sourcemap: false,
     },
     {
-      file: 'custom_components/switch_for_time/www/switch-for-time-card.js',
+      file: 'custom_components/toggle_timer/www/toggle-timer-card.js',
       format: 'es',
       sourcemap: false,
     },

@@ -9,7 +9,7 @@
     "timer_started": "Timer started: {duration} min",
     "timer_cancelled": "Timer cancelled",
     "timer_finished": "Timer finished",
-    "all_slots_in_use": "All switch-for-time slots are in use",
+    "all_slots_in_use": "All toggle-timer slots are in use",
     "custom_duration": "Custom duration",
     "enter_minutes": "Enter minutes (1-1440)",
     "remaining": "Remaining"

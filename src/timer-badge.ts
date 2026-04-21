@@ -2,8 +2,8 @@ import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type { HomeAssistant, TimerState, TimerStateMap } from './types';
 
-@customElement('switch-for-time-badge')
-export class SwitchForTimeBadge extends LitElement {
+@customElement('toggle-timer-badge')
+export class ToggleTimerBadge extends LitElement {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @property({ type: String }) public entity!: string;
 
@@ -56,7 +56,7 @@ export class SwitchForTimeBadge extends LitElement {
             this._updateTimerState();
           }
         },
-        'switch_for_time_started'
+        'toggle_timer_started'
       );
       this._unsubscribeEvents.push(startedUnsubscribe);
 
@@ -68,7 +68,7 @@ export class SwitchForTimeBadge extends LitElement {
             this._remainingSeconds = 0;
           }
         },
-        'switch_for_time_finished'
+        'toggle_timer_finished'
       );
       this._unsubscribeEvents.push(finishedUnsubscribe);
 
@@ -80,7 +80,7 @@ export class SwitchForTimeBadge extends LitElement {
             this._remainingSeconds = 0;
           }
         },
-        'switch_for_time_cancelled'
+        'toggle_timer_cancelled'
       );
       this._unsubscribeEvents.push(cancelledUnsubscribe);
     } catch (err) {
@@ -98,8 +98,8 @@ export class SwitchForTimeBadge extends LitElement {
   private _updateTimerState(): void {
     if (!this.entity) return;
     const stateEntity =
-      this.hass?.states['input_text.switch_for_time_state'] ||
-      this.hass?.states['sensor.switch_for_time_state'];
+      this.hass?.states['input_text.toggle_timer_state'] ||
+      this.hass?.states['sensor.toggle_timer_state'];
     if (!stateEntity) return;
 
     try {

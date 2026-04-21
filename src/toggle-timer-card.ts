@@ -1,7 +1,7 @@
 import { LitElement, html, css, PropertyValues } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type {
-  SwitchForTimeCardConfig,
+  ToggleTimerCardConfig,
   HomeAssistant,
   TimerStateMap,
   TimerState,
@@ -21,15 +21,15 @@ const TRANSLATIONS: Record<string, any> = {
 };
 
 console.info(
-  `%c SWITCH-FOR-TIME-CARD %c ${CARD_VERSION} `,
+  `%c TOGGLE-TIMER-CARD %c ${CARD_VERSION} `,
   'color: white; background: #0288d1; font-weight: bold;',
   'color: #0288d1; background: white; font-weight: bold;'
 );
 
-@customElement('switch-for-time-card')
-export class SwitchForTimeCard extends LitElement implements LovelaceCard {
+@customElement('toggle-timer-card')
+export class ToggleTimerCard extends LitElement implements LovelaceCard {
   @property({ attribute: false }) public hass!: HomeAssistant;
-  @state() private _config!: SwitchForTimeCardConfig;
+  @state() private _config!: ToggleTimerCardConfig;
   @state() private _timerState?: TimerState;
   @state() private _showPopup = false;
   @state() private _showCustomDuration = false;
@@ -43,12 +43,12 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
   private _selectionMode: 'start' | 'replace' | 'extend' = 'start';
 
   public static async getConfigElement() {
-    return document.createElement('switch-for-time-card-editor');
+    return document.createElement('toggle-timer-card-editor');
   }
 
   public static getStubConfig() {
     return {
-      type: 'custom:switch-for-time-card',
+      type: 'custom:toggle-timer-card',
       entity: '',
       action: 'toggle',
       revert_to: 'previous',
@@ -56,7 +56,7 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
     };
   }
 
-  public setConfig(config: SwitchForTimeCardConfig): void {
+  public setConfig(config: ToggleTimerCardConfig): void {
     if (!config.entity) {
       throw new Error(this._localize('editor.entity_required'));
     }
@@ -141,7 +141,7 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
             this._updateTimerState();
           }
         },
-        'switch_for_time_started'
+        'toggle_timer_started'
       );
       this._unsubscribeEvents.push(startedUnsubscribe);
 
@@ -153,7 +153,7 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
             this._remainingSeconds = 0;
           }
         },
-        'switch_for_time_finished'
+        'toggle_timer_finished'
       );
       this._unsubscribeEvents.push(finishedUnsubscribe);
 
@@ -165,7 +165,7 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
             this._remainingSeconds = 0;
           }
         },
-        'switch_for_time_cancelled'
+        'toggle_timer_cancelled'
       );
       this._unsubscribeEvents.push(cancelledUnsubscribe);
     } catch (err) {
@@ -183,8 +183,8 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
   private _updateTimerState(): void {
     if (!this._config?.entity) return;
     const stateEntity =
-      this.hass?.states['input_text.switch_for_time_state'] ||
-      this.hass?.states['sensor.switch_for_time_state'];
+      this.hass?.states['input_text.toggle_timer_state'] ||
+      this.hass?.states['sensor.toggle_timer_state'];
     if (!stateEntity) return;
 
     try {
@@ -281,9 +281,9 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
       }
 
       if (this._hasIntegrationBackend()) {
-        await this.hass.callService('switch_for_time', 'start', serviceData);
+        await this.hass.callService('toggle_timer', 'start', serviceData);
       } else {
-        await this.hass.callService('script', 'switch_for_time', serviceData);
+        await this.hass.callService('script', 'toggle_timer', serviceData);
       }
 
       this._handleClosePopup();
@@ -298,11 +298,11 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
   private async _cancelTimer(): Promise<void> {
     try {
       if (this._hasIntegrationBackend()) {
-        await this.hass.callService('switch_for_time', 'cancel', {
+        await this.hass.callService('toggle_timer', 'cancel', {
           entity_id: this._config.entity,
         });
       } else {
-        await this.hass.callService('script', 'switch_for_time_cancel', {
+        await this.hass.callService('script', 'toggle_timer_cancel', {
           entity_id: this._config.entity,
         });
       }
@@ -315,7 +315,7 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
   }
 
   private _hasIntegrationBackend(): boolean {
-    return Boolean(this.hass?.services?.switch_for_time?.start);
+    return Boolean(this.hass?.services?.toggle_timer?.start);
   }
 
   private _handleClosePopup(): void {
@@ -764,7 +764,7 @@ export class SwitchForTimeCard extends LitElement implements LovelaceCard {
 // Register the card
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
-  type: 'switch-for-time-card',
-  name: 'Switch For Time',
+  type: 'toggle-timer-card',
+  name: 'Toggle Timer',
   description: 'Tap an entity, pick a duration, auto-revert.',
 });

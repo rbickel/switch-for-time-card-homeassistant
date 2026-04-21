@@ -1,15 +1,15 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import type {
-  SwitchForTimeCardConfig,
+  ToggleTimerCardConfig,
   HomeAssistant,
   LovelaceCardEditor,
 } from './types';
 
-@customElement('switch-for-time-card-editor')
-export class SwitchForTimeCardEditor extends LitElement implements LovelaceCardEditor {
+@customElement('toggle-timer-card-editor')
+export class ToggleTimerCardEditor extends LitElement implements LovelaceCardEditor {
   @property({ attribute: false }) public hass!: HomeAssistant;
-  @state() private _config!: SwitchForTimeCardConfig;
+  @state() private _config!: ToggleTimerCardConfig;
   @state() private _durationsError?: string;
   private readonly _allowedConfigKeys = new Set([
     'entity',
@@ -27,7 +27,7 @@ export class SwitchForTimeCardEditor extends LitElement implements LovelaceCardE
     'theme.button_format',
   ]);
 
-  public setConfig(config: SwitchForTimeCardConfig): void {
+  public setConfig(config: ToggleTimerCardConfig): void {
     this._config = config;
   }
 
@@ -66,7 +66,7 @@ export class SwitchForTimeCardEditor extends LitElement implements LovelaceCardE
 
   private _setConfigValue(configValue: string, value: any): void {
     if (!this._allowedConfigKeys.has(configValue)) {
-      console.warn(`switch-for-time-card-editor: ignoring unsupported config key "${configValue}"`);
+      console.warn(`toggle-timer-card-editor: ignoring unsupported config key "${configValue}"`);
       return;
     }
 
@@ -84,7 +84,7 @@ export class SwitchForTimeCardEditor extends LitElement implements LovelaceCardE
     } else if (configValue === 'action') {
       const domain = (newConfig.entity || '').split('.')[0];
       if (domain === 'media_player' && value === 'toggle') {
-        console.warn('switch-for-time-card-editor: media_player does not support toggle, using "on"');
+        console.warn('toggle-timer-card-editor: media_player does not support toggle, using "on"');
         newConfig.action = 'on';
       } else {
         newConfig.action = value;

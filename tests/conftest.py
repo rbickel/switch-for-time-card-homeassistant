@@ -1,9 +1,9 @@
-"""Fixtures for Switch For Time integration tests."""
+"""Fixtures for Toggle Timer integration tests."""
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from homeassistant.components.frontend import DATA_EXTRA_MODULE_URL, DATA_EXTRA_JS_URL_ES5
 
-from custom_components.switch_for_time.const import DOMAIN
+from custom_components.toggle_timer.const import DOMAIN
 
 
 @pytest.fixture(autouse=True)
@@ -25,7 +25,7 @@ def mock_config_entry() -> MockConfigEntry:
     """Return a mock config entry."""
     return MockConfigEntry(
         domain=DOMAIN,
-        title="Switch For Time",
+        title="Toggle Timer",
         data={},
         entry_id="test_entry_id",
     )

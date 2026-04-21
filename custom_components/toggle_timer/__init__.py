@@ -1,4 +1,4 @@
-"""The Switch For Time integration."""
+"""The Toggle Timer integration."""
 
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ from .const import (
     SERVICE_CANCEL,
     SERVICE_START,
 )
-from .manager import SwitchForTimeManager
+from .manager import ToggleTimerManager
 
 PLATFORMS: list[str] = ["sensor"]
 
@@ -47,7 +47,7 @@ def get_card_url(hass: HomeAssistant) -> str:
     except Exception:
         version = "unknown"
 
-    return f"/hacsfiles/{DOMAIN}/switch-for-time-card.js?v={version}"
+    return f"/hacsfiles/{DOMAIN}/toggle-timer-card.js?v={version}"
 
 START_SCHEMA = vol.Schema(
     {
@@ -74,18 +74,18 @@ async def async_setup(hass: HomeAssistant, config: dict[str, Any]) -> bool:
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Switch For Time from a config entry."""
+    """Set up Toggle Timer from a config entry."""
     # Get the card URL with version query parameter for cache-busting
     card_url = get_card_url(hass)
     # Register the static path without version parameter
-    base_card_url = f"/hacsfiles/{DOMAIN}/switch-for-time-card.js"
+    base_card_url = f"/hacsfiles/{DOMAIN}/toggle-timer-card.js"
 
     # Register the frontend card
     await hass.http.async_register_static_paths(
         [
             StaticPathConfig(
                 url_path=base_card_url,
-                path=hass.config.path(f"custom_components/{DOMAIN}/www/switch-for-time-card.js"),
+                path=hass.config.path(f"custom_components/{DOMAIN}/www/toggle-timer-card.js"),
                 cache_headers=True,
             )
         ]
@@ -93,18 +93,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Use versioned URL for loading to bust cache
     add_extra_js_url(hass, card_url)
 
-    manager = SwitchForTimeManager(hass)
+    manager = ToggleTimerManager(hass)
     await manager.async_initialize()
 
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = manager
 
     async def async_handle_start(call: ServiceCall) -> None:
-        """Handle switch_for_time.start service."""
+        """Handle toggle_timer.start service."""
         manager = _get_manager(hass)
         await manager.async_start_timer(dict(call.data))
 
     async def async_handle_cancel(call: ServiceCall) -> None:
-        """Handle switch_for_time.cancel service."""
+        """Handle toggle_timer.cancel service."""
         manager = _get_manager(hass)
         await manager.async_cancel_timer(call.data[ATTR_ENTITY_ID])
 
@@ -132,8 +132,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
-    domain_data: dict[str, SwitchForTimeManager] | None = hass.data.get(DOMAIN)
-    manager: SwitchForTimeManager | None = None
+    domain_data: dict[str, ToggleTimerManager] | None = hass.data.get(DOMAIN)
+    manager: ToggleTimerManager | None = None
     if domain_data is not None:
         manager = domain_data.pop(entry.entry_id, None)
     if manager is not None:
@@ -148,9 +148,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return unload_ok
 
 
-def _get_manager(hass: HomeAssistant) -> SwitchForTimeManager:
+def _get_manager(hass: HomeAssistant) -> ToggleTimerManager:
     managers = hass.data.get(DOMAIN, {})
     if not managers:
-        raise HomeAssistantError("Switch For Time integration is not loaded")
+        raise HomeAssistantError("Toggle Timer integration is not loaded")
 
     return next(iter(managers.values()))

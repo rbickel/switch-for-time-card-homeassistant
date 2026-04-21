@@ -1,4 +1,4 @@
-"""Runtime manager for Switch For Time timers."""
+"""Runtime manager for Toggle Timer timers."""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ from .const import (
 )
 
 
-class SwitchForTimeManager:
+class ToggleTimerManager:
     """Handle timer lifecycle and persistence."""
 
     def __init__(self, hass: HomeAssistant) -> None:

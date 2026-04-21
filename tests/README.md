@@ -1,6 +1,6 @@
 # Integration Tests
 
-This directory contains integration tests for the Switch For Time custom Home Assistant integration.
+This directory contains integration tests for the Toggle Timer custom Home Assistant integration.
 
 ## Setup
 
@@ -46,8 +46,8 @@ pytest tests/test_init.py::test_async_setup_entry_registers_static_paths -v
 
 1. **Integration Setup** - Tests that the integration loads correctly
 2. **Static Path Registration** - Tests that the frontend card is registered using StaticPathConfig
-3. **Service Registration** - Tests that `switch_for_time.start` and `switch_for_time.cancel` services are registered
-4. **Manager Initialization** - Tests that the SwitchForTimeManager is created and initialized
+3. **Service Registration** - Tests that `toggle_timer.start` and `toggle_timer.cancel` services are registered
+4. **Manager Initialization** - Tests that the ToggleTimerManager is created and initialized
 5. **Platform Forwarding** - Tests that the sensor platform is loaded
 6. **Unload** - Tests that the integration unloads cleanly
 7. **End-to-End** - Tests the full integration lifecycle with HTTP component
