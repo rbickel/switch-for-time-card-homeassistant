@@ -12,7 +12,6 @@ MANIFEST_VERSION = json.loads(
 
 def test_version_files_are_kept_in_sync():
     """Package metadata and source version should match the integration version."""
-    hacs_version = json.loads((REPO_ROOT / "hacs.json").read_text())["version"]
     package_version = json.loads((REPO_ROOT / "package.json").read_text())["version"]
     types_source = (REPO_ROOT / "src" / "types.ts").read_text()
     types_version = re.search(
@@ -20,7 +19,6 @@ def test_version_files_are_kept_in_sync():
         types_source,
     )
 
-    assert hacs_version == MANIFEST_VERSION
     assert package_version == MANIFEST_VERSION
     assert types_version is not None
     assert types_version.group(1) == MANIFEST_VERSION

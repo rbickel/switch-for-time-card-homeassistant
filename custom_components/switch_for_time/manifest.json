@@ -1,18 +1,18 @@
 {
   "domain": "switch_for_time",
   "name": "Switch For Time",
-  "version": "1.2.15",
-  "documentation": "https://github.com/rbickel/switch-for-time-card-homeassistant",
-  "issue_tracker": "https://github.com/rbickel/switch-for-time-card-homeassistant/issues",
-  "dependencies": [],
-  "requirements": [],
+  "after_dependencies": [
+    "http"
+  ],
   "codeowners": [
     "@rbickel"
   ],
   "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/rbickel/switch-for-time-card-homeassistant",
   "integration_type": "service",
   "iot_class": "local_push",
-  "after_dependencies": [
-    "http"
-  ]
+  "issue_tracker": "https://github.com/rbickel/switch-for-time-card-homeassistant/issues",
+  "requirements": [],
+  "version": "1.2.15"
 }
