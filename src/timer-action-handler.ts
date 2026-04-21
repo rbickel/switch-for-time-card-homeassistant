@@ -263,11 +263,74 @@ export class SwitchForTimeActionHandler extends LitElement {
       if (hass) {
         return hass as HomeAssistant;
       }
+
+      const rootNode =
+        typeof (node as any)?.getRootNode === 'function'
+          ? (node as any).getRootNode()
+          : undefined;
+      const rootHass = (rootNode as any)?.hass;
+      if (rootHass) {
+        return rootHass as HomeAssistant;
+      }
     }
 
     const root = document.querySelector('home-assistant') as any;
     if (root?.hass) {
       return root.hass as HomeAssistant;
+    }
+
+    return this._resolveHassFromKnownRoots();
+  }
+
+  private _resolveHassFromKnownRoots(): HomeAssistant | undefined {
+    const selectors = [
+      'home-assistant',
+      'hc-main',
+      'home-assistant-main',
+      'ha-panel-lovelace',
+      'hui-root',
+    ];
+
+    for (const selector of selectors) {
+      const element = document.querySelector(selector) as any;
+      const hass = this._resolveHassFromElement(element);
+      if (hass) {
+        return hass;
+      }
+    }
+
+    return undefined;
+  }
+
+  private _resolveHassFromElement(element: any): HomeAssistant | undefined {
+    if (!element || typeof element !== 'object') {
+      return undefined;
+    }
+
+    if (element.hass) {
+      return element.hass as HomeAssistant;
+    }
+
+    const shadowRoot = element.shadowRoot as ShadowRoot | undefined;
+    if (!shadowRoot) {
+      return undefined;
+    }
+
+    const nestedSelectors = [
+      'home-assistant-main',
+      'ha-drawer partial-panel-resolver',
+      'app-drawer-layout partial-panel-resolver',
+      'partial-panel-resolver',
+      'ha-panel-lovelace',
+      'hui-root',
+      'hc-main',
+    ];
+    for (const nestedSelector of nestedSelectors) {
+      const nestedElement = shadowRoot.querySelector(nestedSelector) as any;
+      const hass = this._resolveHassFromElement(nestedElement);
+      if (hass) {
+        return hass;
+      }
     }
 
     return undefined;

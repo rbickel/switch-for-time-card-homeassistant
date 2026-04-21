@@ -52,3 +52,19 @@ def test_built_frontend_assets_support_lovelace_fire_dom_event():
         contents = asset_path.read_text()
         assert 'll-custom' in contents
         assert 'switch-for-time-action' in contents
+
+
+def test_built_frontend_assets_include_hass_resolution_fallback_selectors():
+    """Generated frontend assets should include hass fallback selectors."""
+    for asset_path in (
+        REPO_ROOT / "dist" / "switch-for-time-card.js",
+        REPO_ROOT
+        / "custom_components"
+        / "switch_for_time"
+        / "www"
+        / "switch-for-time-card.js",
+    ):
+        contents = asset_path.read_text()
+        assert "home-assistant-main" in contents
+        assert "ha-panel-lovelace" in contents
+        assert "hui-root" in contents
