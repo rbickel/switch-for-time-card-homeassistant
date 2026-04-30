@@ -121,6 +121,11 @@ class ToggleTimerManager:
             "duration_minutes": duration_minutes,
         }
 
+        # Publish the timer metadata to the sensor attributes before toggling
+        # the target entity, so automations watching this property can react
+        # correctly (e.g. for rollback logic).
+        async_dispatcher_send(self.hass, SIGNAL_STATE_UPDATED)
+
         await self._apply_action(entity_id, action)
         self._schedule_timer(entity_id, ends_at)
 
